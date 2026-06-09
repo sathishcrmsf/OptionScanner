@@ -414,34 +414,55 @@
       html += `<tr class="${expandClass}" data-symbol="${r.symbol}">
         <td colspan="9">
           <div class="row-expansion-card">
+            <!-- LEFT COLUMN: Pivot Points -->
             <div class="expansion-grid">
               <div class="expansion-section">
-                <div class="expansion-label">Daily Pivots</div>
-                <div class="expansion-values">S1: ${fmtPivot(r.pivot_1d_s1)} | P: ${fmtPivot(r.pivot_1d_pp)} | R1: ${fmtPivot(r.pivot_1d_r1)}</div>
+                <div class="expansion-label">Daily Pivots (1D)</div>
+                <div class="expansion-values">
+                  Support 1: ${fmtPivot(r.pivot_1d_s1)}<br>
+                  Pivot:     ${fmtPivot(r.pivot_1d_pp)}<br>
+                  Resist 1:  ${fmtPivot(r.pivot_1d_r1)}
+                </div>
               </div>
               <div class="expansion-section">
-                <div class="expansion-label">Weekly Pivots</div>
-                <div class="expansion-values">S1: ${fmtPivot(r.pivot_1w_s1)} | P: ${fmtPivot(r.pivot_1w_pp)} | R1: ${fmtPivot(r.pivot_1w_r1)} | S2: ${fmtPivot(r.pivot_1w_s2)}</div>
+                <div class="expansion-label">Weekly Pivots (1W)</div>
+                <div class="expansion-values">
+                  Support 1: ${fmtPivot(r.pivot_1w_s1)}<br>
+                  Pivot:     ${fmtPivot(r.pivot_1w_pp)}<br>
+                  Resist 1:  ${fmtPivot(r.pivot_1w_r1)}<br>
+                  Support 2: ${fmtPivot(r.pivot_1w_s2)}
+                </div>
               </div>
               <div class="expansion-section">
-                <div class="expansion-label">Monthly Pivots</div>
-                <div class="expansion-values">S1: ${fmtPivot(r.pivot_1m_s1)} | P: ${fmtPivot(r.pivot_1m_pp)}</div>
+                <div class="expansion-label">Monthly Pivots (1M)</div>
+                <div class="expansion-values">
+                  Support 1: ${fmtPivot(r.pivot_1m_s1)}<br>
+                  Pivot:     ${fmtPivot(r.pivot_1m_pp)}
+                </div>
               </div>
             </div>
+            <!-- RIGHT COLUMN: Bollinger Bands & Tech -->
             <div class="expansion-grid">
               <div class="expansion-section">
                 <div class="expansion-label">Bollinger Bands</div>
-                <div class="expansion-values">Upper: ${fmtPivot(r.bb_upper)} | Mid: ${fmtPivot(r.bb_middle)} | Lower: ${fmtPivot(r.bb_lower)}</div>
+                <div class="expansion-values">
+                  Upper: ${fmtPivot(r.bb_upper)}<br>
+                  Mid:   ${fmtPivot(r.bb_middle)}<br>
+                  Lower: ${fmtPivot(r.bb_lower)}
+                </div>
               </div>
               <div class="expansion-section">
                 <div class="expansion-label">BB Metrics</div>
-                <div class="expansion-values">%B: ${r.bb_pct_b != null ? fmt1(r.bb_pct_b * 100) + "%" : "—"} | Width: ${r.bb_width_pct != null ? fmt1(r.bb_width_pct) + "%" : "—"}</div>
+                <div class="expansion-values">
+                  %B:    ${r.bb_pct_b != null ? fmt1(r.bb_pct_b * 100) + "%" : "—"}<br>
+                  Width: ${r.bb_width_pct != null ? fmt1(r.bb_width_pct) + "%" : "—"}
+                </div>
               </div>
               <div class="expansion-section">
-                <div class="expansion-label">Tech Score</div>
+                <div class="expansion-label">Technical Score</div>
                 <div class="expansion-values">
                   ${r.tech_score != null
-                    ? `<span class="tech-score tech-score--${techBand(r.tech_score)}">${r.tech_score}</span>`
+                    ? `<span class="tech-score tech-score--${techBand(r.tech_score)}">${r.tech_score}/100</span>`
                     : "—"}
                 </div>
               </div>
