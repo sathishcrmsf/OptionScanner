@@ -499,6 +499,11 @@
       const containerId = `chart-${r.symbol.toLowerCase()}`;
       const ctx = document.getElementById(containerId);
       if (ctx && window.Chart) {
+        // Destroy existing chart instance if it exists (prevent canvas reuse error)
+        if (ctx.chartInstance) {
+          ctx.chartInstance.destroy();
+        }
+
         const currentPrice = parseFloat(r.current_price) || 0;
         const s1 = parseFloat(r.pivot_1d_s1) || currentPrice * 0.98;
         const r1 = parseFloat(r.pivot_1d_r1) || currentPrice * 1.02;
@@ -507,7 +512,8 @@
         const minPrice = Math.min(...prices, s1) * 0.99;
         const maxPrice = Math.max(...prices, r1) * 1.01;
 
-        new Chart(ctx, {
+        // Store chart instance on canvas for later cleanup
+        ctx.chartInstance = new Chart(ctx, {
           type: 'line',
           data: {
             labels: Array.from({length: 30}, (_, i) => i),
