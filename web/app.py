@@ -269,11 +269,12 @@ def create_app() -> Flask:
 
 def main() -> None:
     import argparse
+    import os
 
     parser = argparse.ArgumentParser(description="Run the scan results dashboard")
-    parser.add_argument("--host", default="127.0.0.1")
-    parser.add_argument("--port", type=int, default=5000)
-    parser.add_argument("--debug", action="store_true")
+    parser.add_argument("--host", default=os.getenv("HOST", "127.0.0.1"))
+    parser.add_argument("--port", type=int, default=int(os.getenv("PORT", "5000")))
+    parser.add_argument("--debug", action="store_true", default=os.getenv("DEBUG", "").lower() == "true")
     args = parser.parse_args()
     app.run(host=args.host, port=args.port, debug=args.debug)
 

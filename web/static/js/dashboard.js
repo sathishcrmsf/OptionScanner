@@ -107,7 +107,10 @@
   function pollScanStatus() {
     if (scanPollTimer) clearInterval(scanPollTimer);
     let fakeProgress = 10;
+    let pollRetries = 0;
+    const MAX_RETRIES = 30; // 60 seconds at 2s interval
     scanPollTimer = setInterval(() => {
+      pollRetries++;
       fakeProgress = Math.min(fakeProgress + 3, 90);
       $("scan-progress-fill").style.width = fakeProgress + "%";
 
@@ -129,7 +132,15 @@
             }, 400);
           }
         })
-        .catch(() => {});
+        .catch(() => {
+          if (pollRetries > MAX_RETRIES) {
+            clearInterval(scanPollTimer);
+            scanPollTimer = null;
+            $("scan-banner").classList.add("hidden");
+            $("run-scan-btn").disabled = false;
+            showError("Scan timeout after 60 seconds. Please try again.");
+          }
+        });
     }, 2000);
   }
 
@@ -377,11 +388,11 @@
     if (currentTab === "positions" || currentTab === "orders") return;
     restoreScannerTableHeader();
     const tbody = $("results-body");
-    // C3: always use full colspan (15+1 for trade col when connected)
-    const COLSPAN = 15;
+    // Colspan accounts for: Symbol, Price, Strike, Expiry, Premium, Delta, Real Yield, Capital, Flag, Trade (if connected)
+    const COLSPAN = isAlpacaConnected() ? 10 : 9;
 
     if (!rows.length) {
-      tbody.innerHTML = `<tr><td colspan="9" class="empty-cell">No results match the current filters.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="${COLSPAN}" class="empty-cell">No results match the current filters.</td></tr>`;
       return;
     }
 
@@ -798,7 +809,11 @@
     try {
       const r = await fetch("/api/alpaca/account", { headers: alpacaHeaders() });
       const d = await r.json();
-      if (d.error) { showError("Alpaca: " + d.error); return; }
+      if (d.error) {
+        const msg = typeof d.error === 'string' ? d.error : (d.error?.message || 'Unknown error');
+        showError("Alpaca: " + msg);
+        return;
+      }
       renderAlpacaPanel(d);
     } catch(e) {
       showError("Could not reach Alpaca: " + e.message);
@@ -1049,13 +1064,24 @@
       });
     });
 
-    // Custom DTE inputs update badge
+    // Custom DTE inputs update badge + validation
+    const validateDteRange = () => {
+      const min = parseInt($("dte-min-input").value) || 1;
+      const max = parseInt($("dte-max-input").value) || 730;
+      if (min > max) {
+        showError("Min DTE must be less than or equal to Max DTE");
+        $("dte-min-input").value = 1;
+        $("dte-max-input").value = 730;
+      }
+    };
+
     [$("dte-min-input"), $("dte-max-input")].forEach(inp => {
       inp.addEventListener("input", () => {
         const min = $("dte-min-input").value || "?";
         const max = $("dte-max-input").value || "?";
         $("dte-badge").textContent = `${min}–${max} DTE`;
       });
+      inp.addEventListener("blur", validateDteRange);
     });
 
     // Account size save + re-filter
