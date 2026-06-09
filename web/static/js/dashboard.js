@@ -483,6 +483,56 @@
 
     tbody.innerHTML = html;
 
+    // Initialize mini charts for each row
+    rows.forEach(r => {
+      const containerId = `chart-${r.symbol.toLowerCase()}`;
+      const ctx = document.getElementById(containerId);
+      if (ctx && window.Chart) {
+        const currentPrice = parseFloat(r.current_price) || 0;
+        const s1 = parseFloat(r.pivot_1d_s1) || currentPrice * 0.98;
+        const r1 = parseFloat(r.pivot_1d_r1) || currentPrice * 1.02;
+
+        const prices = generatePriceHistory(currentPrice, 30);
+        const minPrice = Math.min(...prices, s1) * 0.99;
+        const maxPrice = Math.max(...prices, r1) * 1.01;
+
+        new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: Array.from({length: 30}, (_, i) => i),
+            datasets: [{
+              label: 'Price',
+              data: prices,
+              borderColor: '#3b82f6',
+              borderWidth: 2,
+              fill: true,
+              backgroundColor: 'rgba(59, 130, 246, 0.05)',
+              pointRadius: 0,
+              pointHoverRadius: 0,
+              tension: 0.3
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: { enabled: false }
+            },
+            scales: {
+              x: { display: false, grid: { display: false } },
+              y: {
+                display: false,
+                grid: { display: false },
+                min: minPrice,
+                max: maxPrice
+              }
+            }
+          }
+        });
+      }
+    });
+
     // Add click handlers to expand/collapse
     document.querySelectorAll(".row-data").forEach(row => {
       row.addEventListener("click", () => {
@@ -684,105 +734,9 @@
     return prices;
   }
 
-  // Create mini chart HTML with Chart.js
+  // Create mini chart HTML (chart initialized separately in renderTable)
   function createMiniChartHtml(rowData, containerId) {
-    const currentPrice = parseFloat(rowData.current_price) || 0;
-    const pivotP = parseFloat(rowData.pivot_1d_pp) || currentPrice;
-    const s1 = parseFloat(rowData.pivot_1d_s1) || currentPrice * 0.98;
-    const r1 = parseFloat(rowData.pivot_1d_r1) || currentPrice * 1.02;
-    const tcPrice = (currentPrice + pivotP) / 2;
-    const bcPrice = (pivotP + s1) / 2;
-
-    const prices = generatePriceHistory(currentPrice, 30);
-    const minPrice = Math.min(...prices, s1) * 0.99;
-    const maxPrice = Math.max(...prices, r1) * 1.01;
-
-    return `
-      <div style="position: relative; height: 90px; margin-bottom: 1rem;">
-        <canvas id="${containerId}"></canvas>
-      </div>
-      <script>
-        (function() {
-          const ctx = document.getElementById('${containerId}');
-          if (!ctx) return;
-
-          const yMin = ${minPrice};
-          const yMax = ${maxPrice};
-          const yRange = yMax - yMin;
-
-          const chart = new Chart(ctx, {
-            type: 'line',
-            data: {
-              labels: Array.from({length: 30}, (_, i) => i),
-              datasets: [{
-                label: 'Price',
-                data: ${JSON.stringify(prices)},
-                borderColor: '#3b82f6',
-                borderWidth: 2,
-                fill: true,
-                fillColor: 'rgba(59, 130, 246, 0.1)',
-                backgroundColor: 'rgba(59, 130, 246, 0.05)',
-                pointRadius: 0,
-                pointHoverRadius: 0,
-                tension: 0.3
-              }]
-            },
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              interaction: { mode: 'nearest', intersect: false },
-              plugins: {
-                legend: { display: false },
-                tooltip: { enabled: false },
-                annotation: {
-                  annotations: {
-                    s1Line: {
-                      type: 'line',
-                      yMin: ${s1},
-                      yMax: ${s1},
-                      borderColor: 'rgba(16, 185, 129, 0.4)',
-                      borderWidth: 1,
-                      borderDash: [4, 4]
-                    },
-                    pivotLine: {
-                      type: 'line',
-                      yMin: ${pivotP},
-                      yMax: ${pivotP},
-                      borderColor: 'rgba(99, 102, 241, 0.6)',
-                      borderWidth: 2
-                    },
-                    r1Line: {
-                      type: 'line',
-                      yMin: ${r1},
-                      yMax: ${r1},
-                      borderColor: 'rgba(244, 63, 94, 0.4)',
-                      borderWidth: 1,
-                      borderDash: [4, 4]
-                    },
-                    cprZone: {
-                      type: 'box',
-                      yMin: ${bcPrice},
-                      yMax: ${tcPrice},
-                      backgroundColor: 'rgba(99, 102, 241, 0.08)',
-                      borderColor: 'transparent'
-                    }
-                  }
-                }
-              },
-              scales: {
-                x: { display: false, grid: { display: false } },
-                y: {
-                  display: false,
-                  grid: { display: false },
-                  min: ${minPrice},
-                  max: ${maxPrice}
-                }
-              }
-            }
-          });
-        })();
-      </script>
-    `;
+    return `<canvas id="${containerId}"></canvas>`;
   }
 
   function showSuccess(msg) {
