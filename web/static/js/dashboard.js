@@ -417,11 +417,15 @@
             ? `<span class="tech-score tech-score--${techBand(r.tech_score)}">${r.tech_score}</span>`
             : "—"}
         </td>
-        <td class="col-extra${colsExpanded ? " show" : ""}">${fmtPivot(r.pivot_1w_pp)}</td>
+        <td class="col-extra${colsExpanded ? " show" : ""}">${fmtPivot(r.pivot_1d_s1)}</td>
+        <td class="col-extra${colsExpanded ? " show" : ""}">${fmtPivot(r.pivot_1d_pp)}</td>
+        <td class="col-extra${colsExpanded ? " show" : ""}">${fmtPivot(r.pivot_1d_r1)}</td>
         <td class="col-extra${colsExpanded ? " show" : ""}">${fmtPivot(r.pivot_1w_s1)}</td>
+        <td class="col-extra${colsExpanded ? " show" : ""}">${fmtPivot(r.pivot_1w_pp)}</td>
+        <td class="col-extra${colsExpanded ? " show" : ""}">${fmtPivot(r.pivot_1w_r1)}</td>
         <td class="col-extra${colsExpanded ? " show" : ""}">${fmtPivot(r.pivot_1w_s2)}</td>
-        <td class="col-extra${colsExpanded ? " show" : ""}">${fmtPivot(r.pivot_1m_pp)}</td>
         <td class="col-extra${colsExpanded ? " show" : ""}">${fmtPivot(r.pivot_1m_s1)}</td>
+        <td class="col-extra${colsExpanded ? " show" : ""}">${fmtPivot(r.pivot_1m_pp)}</td>
         <td class="col-extra${colsExpanded ? " show" : ""}">${fmtPivot(r.bb_upper)}</td>
         <td class="col-extra${colsExpanded ? " show" : ""}">${fmtPivot(r.bb_middle)}</td>
         <td class="col-extra${colsExpanded ? " show" : ""}">${fmtPivot(r.bb_lower)}</td>
@@ -760,11 +764,15 @@
       <th data-sort="risk_adjusted_yield" class="col-extra${colsExpanded ? " show" : ""}">Risk-Adj %</th>
       <th data-sort="bid_ask_spread_pct" class="col-extra${colsExpanded ? " show" : ""}">Spread %</th>
       <th data-sort="tech_score" class="col-extra${colsExpanded ? " show" : ""}">Tech Score</th>
-      <th data-sort="pivot_1w_pp" class="col-extra${colsExpanded ? " show" : ""}">W.PP</th>
+      <th data-sort="pivot_1d_s1" class="col-extra${colsExpanded ? " show" : ""}">D.S1</th>
+      <th data-sort="pivot_1d_pp" class="col-extra${colsExpanded ? " show" : ""}">D.PP</th>
+      <th data-sort="pivot_1d_r1" class="col-extra${colsExpanded ? " show" : ""}">D.R1</th>
       <th data-sort="pivot_1w_s1" class="col-extra${colsExpanded ? " show" : ""}">W.S1</th>
+      <th data-sort="pivot_1w_pp" class="col-extra${colsExpanded ? " show" : ""}">W.PP</th>
+      <th data-sort="pivot_1w_r1" class="col-extra${colsExpanded ? " show" : ""}">W.R1</th>
       <th data-sort="pivot_1w_s2" class="col-extra${colsExpanded ? " show" : ""}">W.S2</th>
-      <th data-sort="pivot_1m_pp" class="col-extra${colsExpanded ? " show" : ""}">M.PP</th>
       <th data-sort="pivot_1m_s1" class="col-extra${colsExpanded ? " show" : ""}">M.S1</th>
+      <th data-sort="pivot_1m_pp" class="col-extra${colsExpanded ? " show" : ""}">M.PP</th>
       <th data-sort="bb_upper" class="col-extra${colsExpanded ? " show" : ""}">BB Upper</th>
       <th data-sort="bb_middle" class="col-extra${colsExpanded ? " show" : ""}">BB Mid</th>
       <th data-sort="bb_lower" class="col-extra${colsExpanded ? " show" : ""}">BB Lower</th>
