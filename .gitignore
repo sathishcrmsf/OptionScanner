@@ -1,0 +1,39 @@
+# Environment
+.env
+.env.local
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Scanner outputs (timestamped results)
+outputs/options_opportunities_*.csv
+outputs/options_opportunities_*.json
+outputs/dashboard.html
+# Legacy root-level outputs (pre-restructure)
+options_opportunities_*.csv
+options_opportunities_*.json
+
+# Logs
+logs/*.log
+scan_output.log
+outputs/dashboard.log
+
+# Cache
+data/cache/
+cache/
+
+# Credentials — never commit these
+data/credentials.json
+
+# IDE / local config
+.claude/settings.local.json
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store

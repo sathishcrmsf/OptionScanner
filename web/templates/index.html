@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CSP Scanner</title>
+  <link rel="stylesheet" href="/static/css/dashboard.css?v=18">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+  <script src="/static/js/dashboard.js?v=18" defer></script>
+</head>
+<body>
+
+  <!-- ── ZONE 1: TOP BAR ──────────────────────────────────────────────────── -->
+  <header class="topbar">
+    <div class="topbar-brand">
+      <span class="topbar-logo">◈</span>
+      <div>
+        <h1 class="topbar-title">CSP Scanner</h1>
+        <span class="topbar-sub">research only · no trades placed ·
+          <button class="guide-text-btn" id="guide-text-btn">New to CSP? Start here →</button>
+        </span>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <button class="btn-ghost" id="alpaca-settings-btn" title="Connect Alpaca account">⚙️ Alpaca</button>
+      <button class="btn-ghost" id="history-btn" title="View past scans">
+        📋 History
+      </button>
+      <select id="scan-history" class="history-select hidden" aria-label="Scan history">
+        <option value="">Loading…</option>
+      </select>
+    </div>
+  </header>
+
+  <!-- ── ALPACA SETTINGS MODAL ────────────────────────────────────────────── -->
+  <div id="alpaca-modal-overlay" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-label="Alpaca settings">
+    <div class="modal-card modal-card--wide">
+      <div class="modal-header">
+        <h3 class="modal-title">⚙️ Settings</h3>
+        <button class="modal-close" id="alpaca-modal-close" aria-label="Close">✕</button>
+      </div>
+
+      <!-- ── Alpaca Trading (paper) ──────────────────────────────────── -->
+      <div class="modal-section-header">🦙 Alpaca Paper Trading</div>
+      <p class="modal-subtitle">For placing trades. Stored in browser localStorage only — never sent to this server.</p>
+      <div class="modal-field">
+        <label class="modal-label" for="alpaca-key-input">API Key ID</label>
+        <input id="alpaca-key-input" type="password" class="modal-input" placeholder="PKxxxxxxxxxxxxxxxxxx" autocomplete="off">
+      </div>
+      <div class="modal-field">
+        <label class="modal-label" for="alpaca-secret-input">API Secret Key</label>
+        <input id="alpaca-secret-input" type="password" class="modal-input" placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" autocomplete="off">
+      </div>
+      <p class="modal-note">Get keys at <a href="https://app.alpaca.markets/paper-trading/overview" target="_blank" rel="noopener">app.alpaca.markets → Paper Trading → API Keys</a></p>
+
+      <!-- ── Data Providers ─────────────────────────────────────────── -->
+      <div class="modal-section-header" style="margin-top:1.25rem;">📡 Scanner Data Sources</div>
+      <p class="modal-subtitle">The same Alpaca keys power the scanner backend — stock prices, history, AND options chains. Yahoo Finance is kept as an automatic fallback only.</p>
+      <div id="provider-status-bar" class="provider-status-bar">
+        <span class="provider-badge" id="badge-alpaca-data">Alpaca Data <span class="provider-dot provider-dot--off">●</span></span>
+        <span class="provider-badge" id="badge-yfinance">Yahoo Finance <span class="provider-dot provider-dot--fallback">●</span> fallback</span>
+      </div>
+      <p class="modal-note" style="margin-top:.25rem;">Your keys above are automatically used for scanner data. Hit <strong>Save All Settings</strong> to activate — no extra signup needed.</p>
+
+      <div class="modal-actions">
+        <button class="btn-ghost" id="alpaca-clear-btn">Clear trading credentials</button>
+        <button class="btn-primary" id="alpaca-save-btn">Save All Settings</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TRADE REVIEW MODAL ───────────────────────────────────────────────── -->
+  <div id="trade-modal-overlay" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-label="Trade review">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">Review Order</h3>
+        <button class="modal-close" id="trade-modal-close" aria-label="Close">✕</button>
+      </div>
+      <div class="trade-review-body">
+        <div class="trade-review-headline" id="trade-review-headline">—</div>
+        <div class="trade-review-grid">
+          <div class="trg-row"><span>Order type</span><strong>Limit (Day)</strong></div>
+          <div class="trg-row"><span>Limit price</span><strong id="trade-review-price">—</strong></div>
+          <div class="trg-row"><span>Capital required</span><strong id="trade-review-capital">—</strong></div>
+          <div class="trg-row"><span>Real yield</span><strong id="trade-review-yield">—</strong></div>
+          <div class="trg-row"><span>Delta</span><strong id="trade-review-delta">—</strong></div>
+          <div class="trg-row"><span>DTE</span><strong id="trade-review-dte">—</strong></div>
+        </div>
+        <p class="trade-review-warning">⚠️ This order will be submitted to your <strong>Alpaca paper account</strong>. No real money is involved.</p>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-ghost" id="trade-cancel-btn">Cancel</button>
+        <button class="btn-primary btn-sell" id="trade-confirm-btn">✓ Submit to Alpaca</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ZONE 2: STEP 1 — CONFIGURE YOUR SCAN ────────────────────────────── -->
+  <section class="setup-card" aria-label="Scan configuration">
+    <div class="setup-step-label">STEP 1 · CONFIGURE YOUR SCAN <span class="setup-step-hint">— sets what the scanner fetches across ~580 stocks</span></div>
+    <div class="setup-body">
+
+      <div class="setup-group">
+        <label class="setup-label">
+          Strategy DTE
+          <span class="col-info" data-tip="Days to Expiration — how far out your contracts expire. The 45-Day preset is the theta sweet spot: decay accelerates fastest between 30–45 days, giving you the best income-to-risk ratio. Shorter DTE = faster income but more gamma risk.">ⓘ</span>
+        </label>
+        <div class="dte-presets" id="dte-presets">
+          <button type="button" class="btn-dte" data-preset="WEEKLY"    title="1–7 days">Weekly</button>
+          <button type="button" class="btn-dte" data-preset="MONTHLY"   title="21–35 days">Monthly</button>
+          <button type="button" class="btn-dte active" data-preset="STANDARD" title="38–52 days">45-Day</button>
+          <button type="button" class="btn-dte" data-preset="QUARTERLY" title="60–90 days">Quarterly</button>
+          <button type="button" class="btn-dte" data-preset="LEAPS"     title="180–730 days">LEAPS</button>
+          <button type="button" class="btn-dte" data-preset="CUSTOM"    title="Set custom range">Custom</button>
+        </div>
+        <div class="dte-custom hidden" id="dte-custom">
+          <input id="dte-min-input" type="number" min="1" max="730" value="1" aria-label="Min DTE">
+          <span class="sep">–</span>
+          <input id="dte-max-input" type="number" min="1" max="730" value="730" aria-label="Max DTE">
+          <span class="setup-label">days</span>
+        </div>
+        <span id="dte-badge" class="dte-badge">38–52 DTE</span>
+      </div>
+
+      <div class="setup-group">
+        <label class="setup-label" for="account-size-input">
+          My Account Size
+          <span class="col-info" data-tip="Enter your total account value. We'll hide any contracts that require more capital than this — your broker will reject trades you can't cover. E.g. a $300 strike = $30,000 required per contract.">ⓘ</span>
+        </label>
+        <div class="account-input-wrap">
+          <span class="account-prefix">$</span>
+          <input id="account-size-input" type="number" min="0" step="1000" placeholder="Leave blank = no limit" aria-label="Account size">
+        </div>
+        <span class="setup-hint">Hides contracts you can't afford</span>
+      </div>
+
+      <div class="setup-actions">
+        <button id="run-scan-btn" type="button" class="btn-primary-lg">▶ Run Scan</button>
+        <span id="last-scan-time" class="last-scan-time"></span>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── ZONE 2b: ALPACA ACCOUNT PANEL ──────────────────────────────────── -->
+  <section id="alpaca-panel" class="alpaca-panel hidden" aria-label="Alpaca account">
+    <div class="alpaca-panel-header">
+      <span class="alpaca-panel-title">📈 Alpaca Paper Account</span>
+      <button class="btn-ghost btn-sm" id="alpaca-refresh-btn" title="Refresh account data">↻ Refresh</button>
+    </div>
+    <div id="alpaca-panel-body" class="alpaca-kpi-row">
+      <div class="account-placeholder">
+        <span>Connect your Alpaca account →</span>
+        <button class="link-btn" id="alpaca-connect-link">Set up credentials</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── ZONE 3: STATUS BANNERS ───────────────────────────────────────────── -->
+  <div id="scan-banner" class="scan-banner hidden" role="status">
+    <div class="scan-progress-wrap">
+      <span class="spinner"></span>
+      <span id="scan-banner-text">Scan in progress…</span>
+    </div>
+    <div class="scan-progress-bar"><div class="scan-progress-fill" id="scan-progress-fill"></div></div>
+  </div>
+  <div id="success-banner" class="success-banner hidden" role="status"></div>
+  <div id="error-banner" class="error-banner hidden" role="alert"></div>
+
+  <!-- ── ZONE 4: SUMMARY ──────────────────────────────────────────────────── -->
+  <section class="summary-section" aria-label="Scan summary">
+    <div class="kpi-row">
+      <article class="kpi-pill">
+        <span class="kpi-pill-label">Opportunities</span>
+        <span class="kpi-pill-value" id="kpi-total">—</span>
+      </article>
+      <article class="kpi-pill kpi-pill--accent">
+        <span class="kpi-pill-label">
+          High Yield
+          <span class="col-info" data-tip="Contracts meeting all 4 exceptional criteria: yield >10%, OTM >15%, delta >−0.20, OI ≥500. WARNING: this combination usually only appears when IV is extremely elevated due to earnings or sector crisis. Verify IV before trading.">ⓘ</span>
+        </span>
+        <span class="kpi-pill-value" id="kpi-flagged">—</span>
+      </article>
+      <article class="kpi-pill">
+        <span class="kpi-pill-label">Symbols</span>
+        <span class="kpi-pill-value" id="kpi-symbols">—</span>
+      </article>
+      <article class="kpi-pill">
+        <span class="kpi-pill-label">
+          Scan DTE
+          <span class="col-info" data-tip="The DTE window used for this scan. The 45-day range is the theta sweet spot — decay accelerates fastest between 30–45 days, giving the best income-to-risk ratio for most CSP strategies.">ⓘ</span>
+        </span>
+        <span class="kpi-pill-value kpi-pill-value--sm" id="kpi-dte">—</span>
+      </article>
+    </div>
+    <div class="kpi-meta">
+      <span id="kpi-scan-time" class="kpi-scan-time"></span>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <div>
+          <h2 class="chart-title">Top 10 · Most Income-Efficient Trades</h2>
+          <p class="chart-caption">Ranked by Income Efficiency = premium income per day per $1,000 of capital at risk · DTE-neutral · OI ≥ 500 only · bar color = risk band · hover a bar for full details</p>
+        </div>
+        <div class="chart-legend">
+          <span class="legend-dot legend-dot--green"></span><span>Conservative |Δ|≤0.15</span>
+          <span class="legend-dot legend-dot--blue"></span><span>Standard ≤0.22</span>
+          <span class="legend-dot legend-dot--amber"></span><span>Aggressive &gt;0.22</span>
+        </div>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="yield-chart" aria-label="Top 10 balanced opportunities"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── ZONE 5: STEP 2 — PICK YOUR TRADE ────────────────────────────────── -->
+  <section class="results-section" aria-label="Scan results">
+    <div class="results-step-label">STEP 2 · PICK YOUR TRADE</div>
+
+    <div class="results-layout">
+
+      <!-- Filter Sidebar -->
+      <aside class="filter-sidebar" aria-label="Filters">
+        <div class="sidebar-heading">REFINE RESULTS</div>
+        <p class="sidebar-hint">Instant filter on loaded data — no re-scan needed</p>
+
+        <div class="sf">
+          <label class="sf-label" for="filter-ticker">Ticker</label>
+          <input id="filter-ticker" type="search" class="sf-input" placeholder="e.g. AAPL" autocomplete="off">
+        </div>
+
+        <div class="sf">
+          <label class="sf-label">
+            Min Yield
+            <span class="col-info" data-tip="Filters out low-income contracts. 5%+ annualized Real Yield is a reasonable starting floor for CSP selling. Higher = more income but also more risk.">ⓘ</span>
+          </label>
+          <div class="sf-range-row">
+            <input id="filter-min-yield" type="range" min="0" max="50" step="0.5" value="0">
+            <output id="filter-min-yield-val" class="sf-output">0%</output>
+          </div>
+        </div>
+
+        <div class="sf">
+          <label class="sf-label">
+            Max |Delta|
+            <span class="col-info" data-tip="Filters out high-risk contracts. Keep below 0.30 to stay in the 70%+ probability-of-profit zone. Lower delta = safer but less premium income.">ⓘ</span>
+          </label>
+          <div class="sf-range-row">
+            <input id="filter-max-delta" type="range" min="0.05" max="0.35" step="0.01" value="0.35">
+            <output id="filter-max-delta-val" class="sf-output">0.35</output>
+          </div>
+        </div>
+
+        <div class="sf">
+          <label class="sf-label">
+            DTE Range
+            <span class="col-info" data-tip="Narrows within the scan window. To change the DTE range entirely, update the preset in Step 1 and re-scan.">ⓘ</span>
+          </label>
+          <div class="sf-dte-row">
+            <input id="filter-dte-min" type="number" min="1" max="730" value="1" aria-label="Min DTE filter">
+            <span class="sep">–</span>
+            <input id="filter-dte-max" type="number" min="1" max="730" value="730" aria-label="Max DTE filter">
+          </div>
+        </div>
+
+        <div class="sf sf--check">
+          <label class="sf-check-label">
+            <input id="filter-flagged-only" type="checkbox">
+            <span>⚡ High Yield only</span>
+          </label>
+        </div>
+
+        <div class="sf-meta">
+          <span id="row-count" class="sf-row-count">—</span>
+          <span id="filter-summary" class="sf-filter-summary"></span>
+        </div>
+      </aside>
+
+      <!-- Main Results Panel -->
+      <div class="results-main">
+
+        <!-- Banded Picks (Income Efficiency within delta bands) -->
+        <div id="banded-picks" class="banded-picks hidden">
+          <div class="banded-picks-header">
+            🎯 Best Trade by Risk Appetite
+            <span class="col-info" data-tip="Ranked by Income Efficiency = premium income per day per $1,000 of capital at risk. DTE-neutral (no annualization inflation), capital-normalized. Liquidity is a gate (OI≥500), not a score. Pick the band that matches your risk tolerance today.">ⓘ</span>
+          </div>
+          <div class="banded-picks-grid">
+            <div class="band-card band-conservative" id="band-conservative">
+              <div class="band-title">🛡️ Conservative <span class="band-sub">|Δ| ≤ 0.15</span></div>
+              <div class="band-body">—</div>
+            </div>
+            <div class="band-card band-standard" id="band-standard">
+              <div class="band-title">⚖️ Standard <span class="band-sub">|Δ| 0.15–0.22</span></div>
+              <div class="band-body">—</div>
+            </div>
+            <div class="band-card band-aggressive" id="band-aggressive">
+              <div class="band-title">🔥 Aggressive <span class="band-sub">|Δ| 0.22–0.30</span></div>
+              <div class="band-body">—</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabs -->
+        <nav class="tab-bar" aria-label="Result views">
+          <button type="button" class="tab active" data-tab="all">All</button>
+          <button type="button" class="tab" data-tab="flagged">⚡ High Yield</button>
+          <button type="button" class="tab" data-tab="safest">Safest</button>
+          <button type="button" class="tab" data-tab="highest_yield">Highest Yield</button>
+          <button type="button" class="tab" data-tab="balanced">Balanced</button>
+          <button type="button" class="tab tab-alpaca hidden" data-tab="positions" id="tab-positions">📋 Positions</button>
+          <button type="button" class="tab tab-alpaca hidden" data-tab="orders" id="tab-orders">📜 Orders</button>
+          <button type="button" class="btn-cols-toggle" id="cols-toggle" title="Show/hide extra columns" aria-pressed="false">⊕ More columns</button>
+        </nav>
+
+        <!-- Table -->
+        <div class="table-scroll">
+          <table id="results-table">
+            <thead>
+              <tr>
+                <th data-sort="symbol">Symbol</th>
+                <th data-sort="current_price">Price <span class="col-info" data-tip="Current stock price. Context for judging the strike — e.g. if AAPL is $195 and strike is $180, you have a $15 cushion before assignment.">ⓘ</span></th>
+                <th data-sort="strike">Strike <span class="col-info" data-tip="The price you agree to buy 100 shares at if assigned. If the stock closes below this at expiry, you must buy 100 shares. Match this exactly in your broker's options chain.">ⓘ</span></th>
+                <th data-sort="expiration">Expiry (DTE) <span class="col-info" data-tip="Expiration date and days remaining. The 45-day range is the sweet spot — theta decay accelerates most between 30–45 days.">ⓘ</span></th>
+                <th data-sort="premium">Premium <span class="col-info" data-tip="Cash you collect per share. Multiply by 100 for the actual credit per contract. E.g. $2.50 premium = $250 deposited into your account immediately.">ⓘ</span></th>
+                <th data-sort="delta">Delta <span class="col-info" data-tip="Why Delta matters: tells you the probability of being assigned. −0.15 means 85% chance you keep the premium. −0.30 means 30% chance you end up owning the stock. Stay between −0.10 and −0.30 for CSP selling.">ⓘ</span></th>
+                <th data-sort="realistic_yield" class="col-yield">Real Yield % <span class="col-info" data-tip="Why Real Yield matters: the raw Risk-Adj Yield assumes you win every time. Real Yield adjusts for the probability of expiring worthless. This is the number that actually matters for your expected income.">ⓘ</span></th>
+                <th data-sort="capital_required">Capital <span class="col-info" data-tip="Why Capital matters: this cash gets locked in your account the moment you sell the put. A $30,000 capital requirement on a $10,000 account is impossible — your broker will reject the trade.">ⓘ</span></th>
+                <th data-sort="flagged">Flag <span class="col-info" data-tip="⚡ HIGH RISK / HIGH YIELD: yield >10%, OTM >15%, delta >−0.20, OI ≥500. This combination almost never exists on safe stocks — when it does, IV is usually extremely elevated. Verify IV before trading.">ⓘ</span></th>
+                <!-- Extra columns (hidden by default) -->
+                <th data-sort="implied_volatility" class="col-extra hidden">IV % <span class="col-info" data-tip="Why IV matters: High IV = market is fearful = fatter premium. Sell when IV is high, avoid when IV is low. Without checking IV you're flying blind on whether this premium is actually worth taking.">ⓘ</span></th>
+                <th data-sort="theta_per_contract" class="col-extra hidden">θ/day <span class="col-info" data-tip="Why Theta matters: your daily paycheck from time decay alone. A $4/day theta means you earn $4 every market day even if the stock doesn't move. Accelerates as expiry approaches.">ⓘ</span></th>
+                <th data-sort="open_interest" class="col-extra hidden">OI <span class="col-info" data-tip="Why OI matters: low open interest = illiquid contract = wide bid-ask spread = worse fill price. Always prefer OI above 500 to enter and exit cleanly.">ⓘ</span></th>
+                <th data-sort="distance_otm" class="col-extra hidden">OTM % <span class="col-info" data-tip="How far the strike is below the current stock price — your safety cushion before assignment. 10%+ OTM is considered conservative for CSP selling.">ⓘ</span></th>
+                <th data-sort="risk_adjusted_yield" class="col-extra hidden">Risk-Adj % <span class="col-info" data-tip="Annualized return on capital at risk = (Premium ÷ (Strike − Premium)) ÷ Years × 100. WARNING: annualizing a weekly return assumes 52 perfect trades. One assignment wipes months of gains.">ⓘ</span></th>
+                <th data-sort="bid_ask_spread_pct" class="col-extra hidden">Spread % <span class="col-info" data-tip="Bid-ask spread as % of premium. Under 10% is acceptable. Wide spreads mean worse fills — avoid illiquid contracts.">ⓘ</span></th>
+                <!-- Technical context columns -->
+                <th data-sort="tech_score" class="col-extra hidden">Tech Score <span class="col-info" data-tip="0–100 composite technical signal for CSP entry quality. Factors: strike vs weekly/monthly pivot S1/S2 (30 pts), price vs weekly pivot (25 pts), price vs monthly pivot (20 pts), Bollinger Band %B position (15 pts), BB width regime (10 pts). ≥70 = ✅ Strong setup | 50–69 = ⚠️ Marginal | &lt;50 = ⛔ Avoid.">ⓘ</span></th>
+                <th data-sort="pivot_1w_pp" class="col-extra hidden">W.PP <span class="col-info" data-tip="Weekly Pivot Point — the key weekly S/R level. Price above weekly PP = bullish weekly trend; below = bearish. Best CSPs: stock is above W.PP, strike is well below it.">ⓘ</span></th>
+                <th data-sort="pivot_1w_s1" class="col-extra hidden">W.S1 <span class="col-info" data-tip="Weekly Support 1 — first support level for the week. Strike below W.S1 = stock needs to drop through a full support level before touching your put. Good cushion.">ⓘ</span></th>
+                <th data-sort="pivot_1w_s2" class="col-extra hidden">W.S2 <span class="col-info" data-tip="Weekly Support 2 — deep weekly support. Strike below W.S2 = very strong positioning; stock would need a significant weekly breakdown to reach your strike.">ⓘ</span></th>
+                <th data-sort="pivot_1m_pp" class="col-extra hidden">M.PP <span class="col-info" data-tip="Monthly Pivot Point — positional support/resistance. Price above monthly PP = monthly uptrend intact. Below = stock is in a monthly downtrend — avoid selling puts.">ⓘ</span></th>
+                <th data-sort="pivot_1m_s1" class="col-extra hidden">M.S1 <span class="col-info" data-tip="Monthly Support 1 — major monthly support. The best CSP strikes are below M.S1. This means the stock would need to break a major monthly level before threatening assignment.">ⓘ</span></th>
+                <th data-sort="bb_upper" class="col-extra hidden">BB Upper <span class="col-info" data-tip="Bollinger Band upper band (20-day SMA + 2σ). Price near the upper band = extended/overbought — mean reversion risk. If price is already near upper band, the next move may be sideways or down.">ⓘ</span></th>
+                <th data-sort="bb_middle" class="col-extra hidden">BB Mid <span class="col-info" data-tip="Bollinger Band middle (20-day SMA). Price above BB mid = bullish trend; below = bearish. For CSP selling, prefer stocks trading above their BB mid (positive trend bias).">ⓘ</span></th>
+                <th data-sort="bb_lower" class="col-extra hidden">BB Lower <span class="col-info" data-tip="Bollinger Band lower band (20-day SMA − 2σ). Price near BB lower = oversold. DANGER: selling a put when price is near the lower band means IV is elevated from fear, not opportunity — gap risk is high.">ⓘ</span></th>
+                <th data-sort="bb_pct_b" class="col-extra hidden">BB %B <span class="col-info" data-tip="Where price sits within the Bollinger Band: 0% = at lower band, 50% = at mid, 100% = at upper band. Sweet spot for CSP selling: 30–70%. Below 20% = oversold (avoid). Above 80% = overbought (cautious).">ⓘ</span></th>
+                <th data-sort="bb_width_pct" class="col-extra hidden">BB Width <span class="col-info" data-tip="Band width as % of the mid-price. Under 10% = volatility squeeze = calm, directional trend (ideal for theta selling). Over 30% = vol expansion = directional move imminent (extra caution needed).">ⓘ</span></th>
+                <th class="col-trade alpaca-col hidden" id="th-trade">Trade</th>
+              </tr>
+            </thead>
+            <tbody id="results-body">
+              <tr><td colspan="9" class="empty-cell">Configure your scan above and click ▶ Run Scan to get started.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div><!-- /results-main -->
+    </div><!-- /results-layout -->
+  </section>
+
+  <!-- ── GUIDE DRAWER ─────────────────────────────────────────────────────── -->
+  <button id="guide-btn" class="guide-fab" aria-label="Open trading guide">?</button>
+
+  <div id="guide-drawer" class="guide-drawer" aria-hidden="true">
+    <div class="guide-drawer-inner">
+      <div class="guide-drawer-header">
+        <h2>How to use CSP Scanner</h2>
+        <button id="guide-close" class="guide-close" aria-label="Close guide">✕</button>
+      </div>
+      <p class="guide-intro">
+        This scanner finds <strong>cash-secured put (CSP)</strong> opportunities. You sell a put,
+        collect premium immediately, and keep cash ready to buy 100 shares at the strike if assigned.
+        Match the row's ticker, expiry, and strike exactly in your broker's options chain.
+      </p>
+      <div class="guide-grid">
+        <article class="guide-card">
+          <h3>The Workflow</h3>
+          <ol class="guide-steps">
+            <li><strong>Step 1</strong> — Pick your DTE preset (45-Day is the sweet spot) and enter your account size.</li>
+            <li><strong>Step 2</strong> — Click ▶ Run Scan. It scans S&P 500 + Nasdaq 100 in parallel.</li>
+            <li><strong>Step 3</strong> — Check the Best Pick card at the top of results — that's your #1 all-around trade.</li>
+            <li><strong>Step 4</strong> — Use the Balanced tab for the best overall picks, or Safest if you're conservative.</li>
+            <li><strong>Step 5</strong> — Note the Symbol, Strike, and Expiry. Open your broker → Trade → Sell Put.</li>
+          </ol>
+        </article>
+        <article class="guide-card">
+          <h3>Key Metrics Explained</h3>
+          <dl class="guide-dl">
+            <dt>Real Yield %</dt><dd>Probability-weighted income. More honest than raw annualized yield — especially for short-DTE options that can show inflated 200%+ numbers.</dd>
+            <dt>Capital</dt><dd>Cash locked in your account = Strike × 100. Your broker requires this upfront.</dd>
+            <dt>Delta</dt><dd>≈ Probability of assignment. −0.15 means 85% chance you keep the premium.</dd>
+            <dt>IV %</dt><dd>Implied Volatility. Sell when high (expensive premium), avoid when low.</dd>
+            <dt>θ/day</dt><dd>Daily income from time decay per contract. Your passive earnings per market day.</dd>
+            <dt>OI</dt><dd>Open Interest. Above 500 = liquid. Below 100 = avoid (bad fills).</dd>
+          </dl>
+        </article>
+        <article class="guide-card">
+          <h3>Row Colours</h3>
+          <ul class="guide-list">
+            <li><span class="swatch swatch-green"></span><strong>Green</strong> — Real yield ≥ 15%.</li>
+            <li><span class="swatch swatch-red"></span><strong>Red</strong> — |delta| > 0.25 (higher assignment risk).</li>
+            <li><span class="swatch swatch-yellow"></span><strong>Yellow</strong> — Earnings fall within contract window. Extreme risk.</li>
+            <li><span class="badge-flagged">⚡</span><strong>High Yield</strong> — All 4 criteria met. Verify IV first.</li>
+          </ul>
+          <h3 style="margin-top:1rem">Tabs</h3>
+          <dl class="guide-dl">
+            <dt>All</dt><dd>Every qualifying put for the selected DTE.</dd>
+            <dt>⚡ High Yield</dt><dd>High yield + deep OTM. High risk — check IV first.</dd>
+            <dt>Safest</dt><dd>Highest OI + lowest delta — easiest fills, most conservative.</dd>
+            <dt>Highest Yield</dt><dd>Sorted by Risk-Adj Yield — most income, check delta.</dd>
+            <dt>Balanced</dt><dd>40% yield + 30% OI + 30% safety — best all-around picks.</dd>
+          </dl>
+        </article>
+      </div>
+    </div>
+  </div>
+  <div id="guide-overlay" class="guide-overlay hidden"></div>
+  <div id="col-tooltip"></div>
+
+</body>
+</html>

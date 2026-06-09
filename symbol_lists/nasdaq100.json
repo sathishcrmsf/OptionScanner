@@ -1,0 +1,484 @@
+{
+  "nasdaq100": [
+    {
+      "symbol": "AAPL",
+      "company_name": "Apple Inc.",
+      "sector": "Technology",
+      "weight": 0.0
+    },
+  {
+    "symbol": "MSFT",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "GOOG",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "GOOGL",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "AMZN",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "TSLA",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "NVDA",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "META",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "PEP",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "AVGO",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "COST",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "CSCO",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "ADBE",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "NFLX",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "INTC",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "AMD",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "TXN",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "QCOM",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "TMUS",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "INTU",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "AMGN",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "SBUX",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "ISRG",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "BKNG",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "GILD",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "MDLZ",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "ADP",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "VRTX",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "REGN",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "ADI",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "MU",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "LRCX",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "KLAC",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "MRNA",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "SNPS",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "ASML",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "CDNS",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "MRVL",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "KDP",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "FTNT",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "ORLY",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "CHTR",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "PAYX",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "CSX",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "CTAS",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "XEL",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "PCAR",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "EXC",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "MNST",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "DXCM",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "AEP",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "ROST",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "BIIB",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "WDAY",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "ILMN",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "FAST",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "IDXX",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "VRSK",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "SGEN",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "DDOG",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "MAR",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "TEAM",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "WBA",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "LULU",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "ZS",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "CPRT",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "ODFL",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "ANSS",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "MTCH",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "EA",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "DOCU",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "SWKS",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "ALGN",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "VRSN",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "OKTA",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "CDW",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "PTON",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "ZM",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "SPLK",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  },
+  {
+    "symbol": "PANW",
+    "company_name": "",
+    "sector": "Technology",
+    "weight": 0.0
+  }
+]
+}
