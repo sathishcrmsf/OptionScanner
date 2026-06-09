@@ -17,7 +17,6 @@
   let currentTab    = "all";
   let sortCol       = "realistic_yield";
   let sortDir       = "desc";
-  let colsExpanded  = false;
   let activePreset  = "STANDARD";
   let scanPollTimer = null;
 
@@ -382,23 +381,24 @@
     const COLSPAN = 15;
 
     if (!rows.length) {
-      tbody.innerHTML = `<tr><td colspan="${COLSPAN}" class="empty-cell">No results match the current filters.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="9" class="empty-cell">No results match the current filters.</td></tr>`;
       return;
     }
 
     const account = getAccountSize();
-    tbody.innerHTML = rows.map(r => {
+    let html = "";
+
+    rows.forEach(r => {
       const cls = rowClass(r);
-      // C4: amber when capital exceeds full account (not 20%)
       const capHigh = (account > 0 && (r.capital_required || 0) > account) ? "col-capital-high" : "";
-      // M2: use != null check so 0 days shows "⚠ 0d"
       const earnWarn = r.earnings_in_window
         ? `<span class="earnings-warn" title="Earnings in ${r.days_to_earnings != null ? r.days_to_earnings : "?"} days">⚠${r.days_to_earnings != null ? " " + r.days_to_earnings + "d" : ""}</span>`
         : "";
       const flag = r.flagged ? `<span class="badge-flagged" title="High yield + deep OTM — verify IV">⚡</span>` : "";
 
-      return `<tr class="${cls}">
-        <td><strong>${r.symbol}</strong>${earnWarn}</td>
+      // Data row with chevron
+      html += `<tr class="${cls} row-data" data-symbol="${r.symbol}">
+        <td><span class="row-chevron">▶</span> <strong>${r.symbol}</strong>${earnWarn}</td>
         <td>$${fmt2(r.current_price)}</td>
         <td>$${fmt2(r.strike)}</td>
         <td>${r.expiration || "—"}<br><small style="color:var(--text-3)">${r.days_to_expiration || "—"}d</small></td>
@@ -407,37 +407,65 @@
         <td><strong>${fmt2(r.realistic_yield)}%</strong></td>
         <td class="${capHigh}">$${Math.round(r.capital_required || 0).toLocaleString()}</td>
         <td>${flag}</td>
-        <td class="col-extra${colsExpanded ? " show" : ""}">${fmt1(r.implied_volatility)}%</td>
-        <td class="col-extra${colsExpanded ? " show" : ""}">$${fmt2(Math.abs(r.theta_per_contract || 0))}</td>
-        <td class="col-extra${colsExpanded ? " show" : ""}">${(r.open_interest || 0).toLocaleString()}</td>
-        <td class="col-extra${colsExpanded ? " show" : ""}">${fmt1(r.distance_otm)}%</td>
-        <td class="col-extra${colsExpanded ? " show" : ""}">${fmt2(r.risk_adjusted_yield)}%</td>
-        <td class="col-extra${colsExpanded ? " show" : ""}">${fmt2(r.bid_ask_spread_pct)}%</td>
-        <td class="col-extra${colsExpanded ? " show" : ""}">
-          ${r.tech_score != null
-            ? `<span class="tech-score tech-score--${techBand(r.tech_score)}">${r.tech_score}</span>`
-            : "—"}
-        </td>
-        <td class="col-extra${colsExpanded ? " show" : ""}">${fmtPivot(r.pivot_1d_s1)}</td>
-        <td class="col-extra${colsExpanded ? " show" : ""}">${fmtPivot(r.pivot_1d_pp)}</td>
-        <td class="col-extra${colsExpanded ? " show" : ""}">${fmtPivot(r.pivot_1d_r1)}</td>
-        <td class="col-extra${colsExpanded ? " show" : ""}">${fmtPivot(r.pivot_1w_s1)}</td>
-        <td class="col-extra${colsExpanded ? " show" : ""}">${fmtPivot(r.pivot_1w_pp)}</td>
-        <td class="col-extra${colsExpanded ? " show" : ""}">${fmtPivot(r.pivot_1w_r1)}</td>
-        <td class="col-extra${colsExpanded ? " show" : ""}">${fmtPivot(r.pivot_1w_s2)}</td>
-        <td class="col-extra${colsExpanded ? " show" : ""}">${fmtPivot(r.pivot_1m_s1)}</td>
-        <td class="col-extra${colsExpanded ? " show" : ""}">${fmtPivot(r.pivot_1m_pp)}</td>
-        <td class="col-extra${colsExpanded ? " show" : ""}">${fmtPivot(r.bb_upper)}</td>
-        <td class="col-extra${colsExpanded ? " show" : ""}">${fmtPivot(r.bb_middle)}</td>
-        <td class="col-extra${colsExpanded ? " show" : ""}">${fmtPivot(r.bb_lower)}</td>
-        <td class="col-extra${colsExpanded ? " show" : ""}">
-          ${r.bb_pct_b != null ? fmt1(r.bb_pct_b * 100) + "%" : "—"}
-        </td>
-        <td class="col-extra${colsExpanded ? " show" : ""}">
-          ${r.bb_width_pct != null ? fmt1(r.bb_width_pct) + "%" : "—"}
+      </tr>`;
+
+      // Expansion row with technical details
+      const expandClass = "row-expansion hidden";
+      html += `<tr class="${expandClass}" data-symbol="${r.symbol}">
+        <td colspan="9">
+          <div class="row-expansion-card">
+            <div class="expansion-grid">
+              <div class="expansion-section">
+                <div class="expansion-label">Daily Pivots</div>
+                <div class="expansion-values">S1: ${fmtPivot(r.pivot_1d_s1)} | P: ${fmtPivot(r.pivot_1d_pp)} | R1: ${fmtPivot(r.pivot_1d_r1)}</div>
+              </div>
+              <div class="expansion-section">
+                <div class="expansion-label">Weekly Pivots</div>
+                <div class="expansion-values">S1: ${fmtPivot(r.pivot_1w_s1)} | P: ${fmtPivot(r.pivot_1w_pp)} | R1: ${fmtPivot(r.pivot_1w_r1)} | S2: ${fmtPivot(r.pivot_1w_s2)}</div>
+              </div>
+              <div class="expansion-section">
+                <div class="expansion-label">Monthly Pivots</div>
+                <div class="expansion-values">S1: ${fmtPivot(r.pivot_1m_s1)} | P: ${fmtPivot(r.pivot_1m_pp)}</div>
+              </div>
+            </div>
+            <div class="expansion-grid">
+              <div class="expansion-section">
+                <div class="expansion-label">Bollinger Bands</div>
+                <div class="expansion-values">Upper: ${fmtPivot(r.bb_upper)} | Mid: ${fmtPivot(r.bb_middle)} | Lower: ${fmtPivot(r.bb_lower)}</div>
+              </div>
+              <div class="expansion-section">
+                <div class="expansion-label">BB Metrics</div>
+                <div class="expansion-values">%B: ${r.bb_pct_b != null ? fmt1(r.bb_pct_b * 100) + "%" : "—"} | Width: ${r.bb_width_pct != null ? fmt1(r.bb_width_pct) + "%" : "—"}</div>
+              </div>
+              <div class="expansion-section">
+                <div class="expansion-label">Tech Score</div>
+                <div class="expansion-values">
+                  ${r.tech_score != null
+                    ? `<span class="tech-score tech-score--${techBand(r.tech_score)}">${r.tech_score}</span>`
+                    : "—"}
+                </div>
+              </div>
+            </div>
+          </div>
         </td>
       </tr>`;
-    }).join("");
+    });
+
+    tbody.innerHTML = html;
+
+    // Add click handlers to expand/collapse
+    document.querySelectorAll(".row-data").forEach(row => {
+      row.addEventListener("click", () => {
+        const symbol = row.getAttribute("data-symbol");
+        const expansionRow = tbody.querySelector(`.row-expansion[data-symbol="${symbol}"]`);
+        if (expansionRow) {
+          expansionRow.classList.toggle("hidden");
+          expansionRow.classList.toggle("visible");
+          row.classList.toggle("expanded");
+        }
+      });
+    });
+
     // Inject Sell Put buttons if Alpaca is connected
     injectSellPutButtons(rows);
   }
@@ -1021,35 +1049,6 @@
       });
     });
 
-    // Column toggle — M3: reset sort to default when collapsing extra cols
-    $("cols-toggle").addEventListener("click", () => {
-      const wasExpanded = colsExpanded;
-      colsExpanded = !colsExpanded;
-      $("cols-toggle").classList.toggle("active", colsExpanded);
-      $("cols-toggle").textContent = colsExpanded ? "⊖ Less columns" : "⊕ More columns";
-      // L1: update aria-pressed
-      $("cols-toggle").setAttribute("aria-pressed", String(colsExpanded));
-      document.querySelectorAll(".col-extra").forEach(el => {
-        el.classList.toggle("show", colsExpanded);
-      });
-      // M3: if collapsing and sort was on a hidden col, reset to default
-      if (wasExpanded && !colsExpanded) {
-        const extraCols = [
-          "implied_volatility","theta_per_contract","open_interest","distance_otm",
-          "risk_adjusted_yield","bid_ask_spread_pct",
-          "tech_score","pivot_1w_pp","pivot_1w_s1","pivot_1w_s2",
-          "pivot_1m_pp","pivot_1m_s1","bb_upper","bb_middle","bb_lower","bb_pct_b","bb_width_pct",
-        ];
-        if (extraCols.includes(sortCol)) {
-          sortCol = "realistic_yield";
-          sortDir = "desc";
-          document.querySelectorAll("#results-table th").forEach(h =>
-            h.classList.remove("sort-asc", "sort-desc")
-          );
-        }
-      }
-      applyFilters();
-    });
 
     // Sidebar filters
     $("filter-ticker").addEventListener("input", applyFilters);

@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>CSP Scanner</title>
-  <link rel="stylesheet" href="/static/css/dashboard.css?v=18">
+  <link rel="stylesheet" href="/static/css/dashboard.css?v=19">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
-  <script src="/static/js/dashboard.js?v=18" defer></script>
+  <script src="/static/js/dashboard.js?v=19" defer></script>
 </head>
 <body>
 
@@ -312,7 +312,6 @@
           <button type="button" class="tab" data-tab="balanced">Balanced</button>
           <button type="button" class="tab tab-alpaca hidden" data-tab="positions" id="tab-positions">📋 Positions</button>
           <button type="button" class="tab tab-alpaca hidden" data-tab="orders" id="tab-orders">📜 Orders</button>
-          <button type="button" class="btn-cols-toggle" id="cols-toggle" title="Show/hide extra columns" aria-pressed="false">⊕ More columns</button>
         </nav>
 
         <!-- Table -->
@@ -320,7 +319,7 @@
           <table id="results-table">
             <thead>
               <tr>
-                <th data-sort="symbol">Symbol</th>
+                <th data-sort="symbol"><span class="col-expand-header">▶</span> Symbol</th>
                 <th data-sort="current_price">Price <span class="col-info" data-tip="Current stock price. Context for judging the strike — e.g. if AAPL is $195 and strike is $180, you have a $15 cushion before assignment.">ⓘ</span></th>
                 <th data-sort="strike">Strike <span class="col-info" data-tip="The price you agree to buy 100 shares at if assigned. If the stock closes below this at expiry, you must buy 100 shares. Match this exactly in your broker's options chain.">ⓘ</span></th>
                 <th data-sort="expiration">Expiry (DTE) <span class="col-info" data-tip="Expiration date and days remaining. The 45-day range is the sweet spot — theta decay accelerates most between 30–45 days.">ⓘ</span></th>
@@ -329,25 +328,6 @@
                 <th data-sort="realistic_yield" class="col-yield">Real Yield % <span class="col-info" data-tip="Why Real Yield matters: the raw Risk-Adj Yield assumes you win every time. Real Yield adjusts for the probability of expiring worthless. This is the number that actually matters for your expected income.">ⓘ</span></th>
                 <th data-sort="capital_required">Capital <span class="col-info" data-tip="Why Capital matters: this cash gets locked in your account the moment you sell the put. A $30,000 capital requirement on a $10,000 account is impossible — your broker will reject the trade.">ⓘ</span></th>
                 <th data-sort="flagged">Flag <span class="col-info" data-tip="⚡ HIGH RISK / HIGH YIELD: yield >10%, OTM >15%, delta >−0.20, OI ≥500. This combination almost never exists on safe stocks — when it does, IV is usually extremely elevated. Verify IV before trading.">ⓘ</span></th>
-                <!-- Extra columns (hidden by default) -->
-                <th data-sort="implied_volatility" class="col-extra hidden">IV % <span class="col-info" data-tip="Why IV matters: High IV = market is fearful = fatter premium. Sell when IV is high, avoid when IV is low. Without checking IV you're flying blind on whether this premium is actually worth taking.">ⓘ</span></th>
-                <th data-sort="theta_per_contract" class="col-extra hidden">θ/day <span class="col-info" data-tip="Why Theta matters: your daily paycheck from time decay alone. A $4/day theta means you earn $4 every market day even if the stock doesn't move. Accelerates as expiry approaches.">ⓘ</span></th>
-                <th data-sort="open_interest" class="col-extra hidden">OI <span class="col-info" data-tip="Why OI matters: low open interest = illiquid contract = wide bid-ask spread = worse fill price. Always prefer OI above 500 to enter and exit cleanly.">ⓘ</span></th>
-                <th data-sort="distance_otm" class="col-extra hidden">OTM % <span class="col-info" data-tip="How far the strike is below the current stock price — your safety cushion before assignment. 10%+ OTM is considered conservative for CSP selling.">ⓘ</span></th>
-                <th data-sort="risk_adjusted_yield" class="col-extra hidden">Risk-Adj % <span class="col-info" data-tip="Annualized return on capital at risk = (Premium ÷ (Strike − Premium)) ÷ Years × 100. WARNING: annualizing a weekly return assumes 52 perfect trades. One assignment wipes months of gains.">ⓘ</span></th>
-                <th data-sort="bid_ask_spread_pct" class="col-extra hidden">Spread % <span class="col-info" data-tip="Bid-ask spread as % of premium. Under 10% is acceptable. Wide spreads mean worse fills — avoid illiquid contracts.">ⓘ</span></th>
-                <!-- Technical context columns -->
-                <th data-sort="tech_score" class="col-extra hidden">Tech Score <span class="col-info" data-tip="0–100 composite technical signal for CSP entry quality. Factors: strike vs weekly/monthly pivot S1/S2 (30 pts), price vs weekly pivot (25 pts), price vs monthly pivot (20 pts), Bollinger Band %B position (15 pts), BB width regime (10 pts). ≥70 = ✅ Strong setup | 50–69 = ⚠️ Marginal | &lt;50 = ⛔ Avoid.">ⓘ</span></th>
-                <th data-sort="pivot_1w_pp" class="col-extra hidden">W.PP <span class="col-info" data-tip="Weekly Pivot Point — the key weekly S/R level. Price above weekly PP = bullish weekly trend; below = bearish. Best CSPs: stock is above W.PP, strike is well below it.">ⓘ</span></th>
-                <th data-sort="pivot_1w_s1" class="col-extra hidden">W.S1 <span class="col-info" data-tip="Weekly Support 1 — first support level for the week. Strike below W.S1 = stock needs to drop through a full support level before touching your put. Good cushion.">ⓘ</span></th>
-                <th data-sort="pivot_1w_s2" class="col-extra hidden">W.S2 <span class="col-info" data-tip="Weekly Support 2 — deep weekly support. Strike below W.S2 = very strong positioning; stock would need a significant weekly breakdown to reach your strike.">ⓘ</span></th>
-                <th data-sort="pivot_1m_pp" class="col-extra hidden">M.PP <span class="col-info" data-tip="Monthly Pivot Point — positional support/resistance. Price above monthly PP = monthly uptrend intact. Below = stock is in a monthly downtrend — avoid selling puts.">ⓘ</span></th>
-                <th data-sort="pivot_1m_s1" class="col-extra hidden">M.S1 <span class="col-info" data-tip="Monthly Support 1 — major monthly support. The best CSP strikes are below M.S1. This means the stock would need to break a major monthly level before threatening assignment.">ⓘ</span></th>
-                <th data-sort="bb_upper" class="col-extra hidden">BB Upper <span class="col-info" data-tip="Bollinger Band upper band (20-day SMA + 2σ). Price near the upper band = extended/overbought — mean reversion risk. If price is already near upper band, the next move may be sideways or down.">ⓘ</span></th>
-                <th data-sort="bb_middle" class="col-extra hidden">BB Mid <span class="col-info" data-tip="Bollinger Band middle (20-day SMA). Price above BB mid = bullish trend; below = bearish. For CSP selling, prefer stocks trading above their BB mid (positive trend bias).">ⓘ</span></th>
-                <th data-sort="bb_lower" class="col-extra hidden">BB Lower <span class="col-info" data-tip="Bollinger Band lower band (20-day SMA − 2σ). Price near BB lower = oversold. DANGER: selling a put when price is near the lower band means IV is elevated from fear, not opportunity — gap risk is high.">ⓘ</span></th>
-                <th data-sort="bb_pct_b" class="col-extra hidden">BB %B <span class="col-info" data-tip="Where price sits within the Bollinger Band: 0% = at lower band, 50% = at mid, 100% = at upper band. Sweet spot for CSP selling: 30–70%. Below 20% = oversold (avoid). Above 80% = overbought (cautious).">ⓘ</span></th>
-                <th data-sort="bb_width_pct" class="col-extra hidden">BB Width <span class="col-info" data-tip="Band width as % of the mid-price. Under 10% = volatility squeeze = calm, directional trend (ideal for theta selling). Over 30% = vol expansion = directional move imminent (extra caution needed).">ⓘ</span></th>
                 <th class="col-trade alpaca-col hidden" id="th-trade">Trade</th>
               </tr>
             </thead>
