@@ -777,7 +777,7 @@
   // Restore the scanner table header (called when switching away from alpaca tabs)
   function restoreScannerTableHeader() {
     document.querySelector("#results-table thead tr").innerHTML = `
-      <th data-sort="symbol">Symbol</th>
+      <th data-sort="symbol"><span class="col-expand-header">▶</span> Symbol</th>
       <th data-sort="current_price">Price</th>
       <th data-sort="strike">Strike</th>
       <th data-sort="expiration">Expiry (DTE)</th>
@@ -786,27 +786,6 @@
       <th data-sort="realistic_yield" class="col-yield">Real Yield %</th>
       <th data-sort="capital_required">Capital</th>
       <th data-sort="flagged">Flag</th>
-      <th data-sort="implied_volatility" class="col-extra${colsExpanded ? " show" : ""}">IV %</th>
-      <th data-sort="theta_per_contract" class="col-extra${colsExpanded ? " show" : ""}">θ/day</th>
-      <th data-sort="open_interest" class="col-extra${colsExpanded ? " show" : ""}">OI</th>
-      <th data-sort="distance_otm" class="col-extra${colsExpanded ? " show" : ""}">OTM %</th>
-      <th data-sort="risk_adjusted_yield" class="col-extra${colsExpanded ? " show" : ""}">Risk-Adj %</th>
-      <th data-sort="bid_ask_spread_pct" class="col-extra${colsExpanded ? " show" : ""}">Spread %</th>
-      <th data-sort="tech_score" class="col-extra${colsExpanded ? " show" : ""}">Tech Score</th>
-      <th data-sort="pivot_1d_s1" class="col-extra${colsExpanded ? " show" : ""}">D.S1</th>
-      <th data-sort="pivot_1d_pp" class="col-extra${colsExpanded ? " show" : ""}">D.PP</th>
-      <th data-sort="pivot_1d_r1" class="col-extra${colsExpanded ? " show" : ""}">D.R1</th>
-      <th data-sort="pivot_1w_s1" class="col-extra${colsExpanded ? " show" : ""}">W.S1</th>
-      <th data-sort="pivot_1w_pp" class="col-extra${colsExpanded ? " show" : ""}">W.PP</th>
-      <th data-sort="pivot_1w_r1" class="col-extra${colsExpanded ? " show" : ""}">W.R1</th>
-      <th data-sort="pivot_1w_s2" class="col-extra${colsExpanded ? " show" : ""}">W.S2</th>
-      <th data-sort="pivot_1m_s1" class="col-extra${colsExpanded ? " show" : ""}">M.S1</th>
-      <th data-sort="pivot_1m_pp" class="col-extra${colsExpanded ? " show" : ""}">M.PP</th>
-      <th data-sort="bb_upper" class="col-extra${colsExpanded ? " show" : ""}">BB Upper</th>
-      <th data-sort="bb_middle" class="col-extra${colsExpanded ? " show" : ""}">BB Mid</th>
-      <th data-sort="bb_lower" class="col-extra${colsExpanded ? " show" : ""}">BB Lower</th>
-      <th data-sort="bb_pct_b" class="col-extra${colsExpanded ? " show" : ""}">BB %B</th>
-      <th data-sort="bb_width_pct" class="col-extra${colsExpanded ? " show" : ""}">BB Width</th>
       <th class="col-trade alpaca-col${isAlpacaConnected() ? "" : " hidden"}" id="th-trade">Trade</th>
     `;
     // Re-bind sort listener
