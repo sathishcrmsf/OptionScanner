@@ -411,59 +411,61 @@
 
       // Expansion row with technical details
       const expandClass = "row-expansion hidden";
+      const techScoreBand = techBand(r.tech_score);
+      const techScoreClass = techScoreBand === "good" ? "tech-good" : techScoreBand === "mid" ? "tech-mid" : "tech-poor";
+
       html += `<tr class="${expandClass}" data-symbol="${r.symbol}">
         <td colspan="9">
           <div class="row-expansion-card">
             <!-- LEFT COLUMN: Pivot Points -->
             <div class="expansion-grid">
               <div class="expansion-section">
-                <div class="expansion-label">Daily Pivots (1D)</div>
+                <div class="expansion-label">📊 Daily Pivots (1D)</div>
                 <div class="expansion-values">
-                  Support 1: ${fmtPivot(r.pivot_1d_s1)}<br>
-                  Pivot:     ${fmtPivot(r.pivot_1d_pp)}<br>
-                  Resist 1:  ${fmtPivot(r.pivot_1d_r1)}
+                  <div><span class="expansion-level-label">Support 1</span><span class="expansion-level-value">${fmtPivot(r.pivot_1d_s1)}</span></div>
+                  <div><span class="expansion-level-label">Pivot</span><span class="expansion-level-value">${fmtPivot(r.pivot_1d_pp)}</span></div>
+                  <div><span class="expansion-level-label">Resist 1</span><span class="expansion-level-value">${fmtPivot(r.pivot_1d_r1)}</span></div>
                 </div>
               </div>
               <div class="expansion-section">
-                <div class="expansion-label">Weekly Pivots (1W)</div>
+                <div class="expansion-label">📈 Weekly Pivots (1W)</div>
                 <div class="expansion-values">
-                  Support 1: ${fmtPivot(r.pivot_1w_s1)}<br>
-                  Pivot:     ${fmtPivot(r.pivot_1w_pp)}<br>
-                  Resist 1:  ${fmtPivot(r.pivot_1w_r1)}<br>
-                  Support 2: ${fmtPivot(r.pivot_1w_s2)}
+                  <div><span class="expansion-level-label">Support 1</span><span class="expansion-level-value">${fmtPivot(r.pivot_1w_s1)}</span></div>
+                  <div><span class="expansion-level-label">Pivot</span><span class="expansion-level-value">${fmtPivot(r.pivot_1w_pp)}</span></div>
+                  <div><span class="expansion-level-label">Resist 1</span><span class="expansion-level-value">${fmtPivot(r.pivot_1w_r1)}</span></div>
+                  <div><span class="expansion-level-label">Support 2</span><span class="expansion-level-value">${fmtPivot(r.pivot_1w_s2)}</span></div>
                 </div>
               </div>
               <div class="expansion-section">
-                <div class="expansion-label">Monthly Pivots (1M)</div>
+                <div class="expansion-label">📅 Monthly Pivots (1M)</div>
                 <div class="expansion-values">
-                  Support 1: ${fmtPivot(r.pivot_1m_s1)}<br>
-                  Pivot:     ${fmtPivot(r.pivot_1m_pp)}
+                  <div><span class="expansion-level-label">Support 1</span><span class="expansion-level-value">${fmtPivot(r.pivot_1m_s1)}</span></div>
+                  <div><span class="expansion-level-label">Pivot</span><span class="expansion-level-value">${fmtPivot(r.pivot_1m_pp)}</span></div>
                 </div>
               </div>
             </div>
             <!-- RIGHT COLUMN: Bollinger Bands & Tech -->
             <div class="expansion-grid">
               <div class="expansion-section">
-                <div class="expansion-label">Bollinger Bands</div>
+                <div class="expansion-label">🔴 Bollinger Bands</div>
                 <div class="expansion-values">
-                  Upper: ${fmtPivot(r.bb_upper)}<br>
-                  Mid:   ${fmtPivot(r.bb_middle)}<br>
-                  Lower: ${fmtPivot(r.bb_lower)}
+                  <div><span class="expansion-level-label">Upper</span><span class="expansion-level-value">${fmtPivot(r.bb_upper)}</span></div>
+                  <div style="font-weight: 600; color: var(--blue);"><span class="expansion-level-label">Mid</span><span class="expansion-level-value">${fmtPivot(r.bb_middle)}</span></div>
+                  <div><span class="expansion-level-label">Lower</span><span class="expansion-level-value">${fmtPivot(r.bb_lower)}</span></div>
+                  <div class="expansion-bar" style="margin-top: 0.3rem;"></div>
                 </div>
               </div>
               <div class="expansion-section">
-                <div class="expansion-label">BB Metrics</div>
+                <div class="expansion-label">⚙️ BB Metrics</div>
                 <div class="expansion-values">
-                  %B:    ${r.bb_pct_b != null ? fmt1(r.bb_pct_b * 100) + "%" : "—"}<br>
-                  Width: ${r.bb_width_pct != null ? fmt1(r.bb_width_pct) + "%" : "—"}
+                  <div><span class="expansion-level-label">%B</span><span class="expansion-level-value">${r.bb_pct_b != null ? fmt1(r.bb_pct_b * 100) + "%" : "—"}</span></div>
+                  <div><span class="expansion-level-label">Width</span><span class="expansion-level-value">${r.bb_width_pct != null ? fmt1(r.bb_width_pct) + "%" : "—"}</span></div>
                 </div>
               </div>
               <div class="expansion-section">
-                <div class="expansion-label">Technical Score</div>
-                <div class="expansion-values">
-                  ${r.tech_score != null
-                    ? `<span class="tech-score tech-score--${techBand(r.tech_score)}">${r.tech_score}/100</span>`
-                    : "—"}
+                <div class="expansion-label">⭐ Technical Score</div>
+                <div class="expansion-tech-score ${techScoreClass}">
+                  ${r.tech_score != null ? r.tech_score : "—"}/100
                 </div>
               </div>
             </div>
