@@ -364,7 +364,9 @@
         <div class="band-row band-eff"><span>Income eff.</span><strong>$${fmt2(r._eff)}<small>/day per $1k</small></strong></div>
         <div class="band-row band-yield"><span>Real Yield</span><strong>${fmt2(r.realistic_yield)}%</strong></div>
         <div class="band-row band-tech"><span>Tech Score</span><strong class="tech-score tech-score--${techBand(r.tech_score)}">${r.tech_score != null ? r.tech_score + "/100" : "—"}</strong></div>
-        ${r.pivot_1w_pp != null ? `<div class="band-row"><span>W.PP / S1</span><strong>$${fmt2(r.pivot_1w_pp)} / $${fmt2(r.pivot_1w_s1)}</strong></div>` : ""}
+        ${r.pivot_1d_pp != null ? `<div class="band-row"><span>Daily PP</span><strong>$${fmt2(r.pivot_1d_pp)}</strong></div>` : ""}
+        ${r.pivot_1w_pp != null ? `<div class="band-row"><span>Weekly PP / S1</span><strong>$${fmt2(r.pivot_1w_pp)} / $${fmt2(r.pivot_1w_s1)}</strong></div>` : ""}
+        ${r.pivot_1m_pp != null ? `<div class="band-row"><span>Monthly PP / S1</span><strong>$${fmt2(r.pivot_1m_pp)} / $${fmt2(r.pivot_1m_s1)}</strong></div>` : ""}
         ${r.bb_pct_b != null ? `<div class="band-row"><span>BB %B</span><strong>${fmt1(r.bb_pct_b * 100)}%</strong></div>` : ""}
       `;
     }
