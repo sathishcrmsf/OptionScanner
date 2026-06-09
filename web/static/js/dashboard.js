@@ -376,6 +376,7 @@
   // ── Table render ──────────────────────────────────────────────────────────
   function renderTable(rows) {
     if (currentTab === "positions" || currentTab === "orders") return;
+    restoreScannerTableHeader();
     const tbody = $("results-body");
     // C3: always use full colspan (15+1 for trade col when connected)
     const COLSPAN = 15;
