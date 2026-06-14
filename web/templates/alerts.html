@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Market Event Alerts</title>
+    <!-- shared nav + home tokens (light design system) + alerts-specific styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/shared.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/alerts.css') }}">
+</head>
+<body>
+    <!-- Shared site navigation -->
+    <nav class="site-nav">
+        <a class="site-nav__brand" href="/">
+            <span class="site-nav__logo">📈</span>
+            <span>Trading Platform</span>
+        </a>
+        <div class="site-nav__links">
+            <a class="site-nav__link" href="/">🏠 Home</a>
+            <a class="site-nav__link" href="/scanner">🔍 Scanner</a>
+            <a class="site-nav__link is-active" href="/alerts">🔔 Alerts</a>
+        </div>
+    </nav>
+
+    <div class="alerts-container">
+        <div class="alerts-header">
+            <h1>🔔 Market Event Alerts</h1>
+            <span id="monitor-pill" class="status-pill">monitor: …</span>
+        </div>
+
+        <div class="alerts-layout">
+            <!-- LEFT: live event feed -->
+            <section>
+                <h2>Live Event Feed</h2>
+                <div class="feed-controls" id="feed-filters">
+                    <button data-type="" class="active">All</button>
+                    <button data-type="economic">📅 Economic</button>
+                    <button data-type="news">📰 News</button>
+                    <button data-type="unusual_move">📈 Moves</button>
+                    <button data-type="political">🗣️ Political</button>
+                </div>
+                <div id="event-feed"><div class="empty">Loading events…</div></div>
+            </section>
+
+            <!-- RIGHT: rules + settings -->
+            <aside>
+                <div class="panel">
+                    <h2>Create Alert Rule</h2>
+                    <label>Rule name</label>
+                    <input type="text" id="rule-name" placeholder="e.g. My watchlist news">
+                    <label>Symbols (comma-separated, blank = any)</label>
+                    <input type="text" id="rule-symbols" placeholder="AAPL, TSLA, NVDA">
+                    <label>Keywords (comma-separated, blank = any)</label>
+                    <input type="text" id="rule-keywords" placeholder="tariff, rate, earnings">
+                    <label>Event types (none = all)</label>
+                    <div class="checks" id="rule-sources">
+                        <label><input type="checkbox" value="economic"> Economic</label>
+                        <label><input type="checkbox" value="news"> News</label>
+                        <label><input type="checkbox" value="unusual_move"> Moves</label>
+                        <label><input type="checkbox" value="political"> Political</label>
+                    </div>
+                    <label>Minimum severity</label>
+                    <select id="rule-severity">
+                        <option value="low">Low</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="high">High</option>
+                    </select>
+                    <label>Notify via</label>
+                    <div class="checks" id="rule-channels">
+                        <label><input type="checkbox" value="in_app" checked> In-app</label>
+                        <label><input type="checkbox" value="telegram"> Telegram</label>
+                        <label><input type="checkbox" value="desktop"> Desktop</label>
+                    </div>
+                    <button class="btn" id="save-rule">+ Add Rule</button>
+                </div>
+
+                <div class="panel">
+                    <h2>Active Rules</h2>
+                    <div id="rules-list"><div class="empty">No rules yet.</div></div>
+                </div>
+
+                <div class="panel">
+                    <h2>Settings</h2>
+                    <label>Finnhub token <span class="hint">(economic calendar + news)</span></label>
+                    <input type="password" id="set-finnhub" placeholder="••••••••">
+                    <label>Telegram bot token</label>
+                    <input type="password" id="set-tg-token" placeholder="123456:ABC-…">
+                    <label>Telegram chat ID</label>
+                    <input type="text" id="set-tg-chat" placeholder="your numeric chat id">
+                    <label>Political feed URL <span class="hint">(optional JSON bridge)</span></label>
+                    <input type="text" id="set-political" placeholder="https://…/feed.json">
+                    <label>Unusual move threshold (%)</label>
+                    <input type="number" id="set-move" step="0.5" placeholder="3.0">
+                    <label>Poll interval (seconds)</label>
+                    <input type="number" id="set-interval" step="10" placeholder="60">
+                    <button class="btn" id="save-settings">Save Settings</button>
+                    <button class="btn secondary" id="test-alert">🧪 Send Test Alert</button>
+                    <div class="hint" id="channel-hint" style="margin-top:0.75rem;"></div>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+    <script src="{{ url_for('static', filename='js/alerts.js') }}"></script>
+</body>
+</html>

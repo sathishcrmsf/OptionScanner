@@ -8,16 +8,19 @@ X-APCA-Key / X-APCA-Secret headers.
 
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, timedelta
 from typing import Any, Dict, List
+import logging
 
 from alpaca.trading.client import TradingClient
-from alpaca.trading.enums import OrderSide, TimeInForce, AssetClass, OrderClass
+from alpaca.trading.enums import OrderSide, TimeInForce, AssetClass, OrderClass, OrderStatus
 from alpaca.trading.requests import (
     GetOrdersRequest,
     LimitOrderRequest,
     OptionLegRequest,
 )
+
+logger = logging.getLogger(__name__)
 
 
 PAPER_URL = "https://paper-api.alpaca.markets"
@@ -84,6 +87,67 @@ def get_orders(key: str, secret: str, limit: int = 20) -> List[Dict[str, Any]]:
             "asset_class": str(o.asset_class),
         })
     return result
+
+
+def get_closed_orders(key: str, secret: str, days_back: int = 90) -> List[Dict[str, Any]]:
+    """
+    Return closed/filled orders from the last N days.
+
+    This is used for syncing trades with the trade journal.
+    Only returns FILLED orders (option positions that are closed).
+
+    Parameters
+    ----------
+    key : str
+        Alpaca API key
+    secret : str
+        Alpaca API secret
+    days_back : int
+        Number of days to look back (default 90)
+
+    Returns
+    -------
+    List[Dict]
+        List of closed orders with trade details
+    """
+    try:
+        client = get_client(key, secret)
+
+        # Get closed orders with filled status
+        req = GetOrdersRequest(
+            status=OrderStatus.FILLED,
+            limit=100,  # Get up to 100 filled orders
+        )
+        orders = client.get_orders(filter=req)
+
+        result = []
+        cutoff_date = date.today() - timedelta(days=days_back)
+
+        for o in orders:
+            # Only include orders filled in the lookback window
+            if o.filled_at:
+                filled_date = o.filled_at.date() if hasattr(o.filled_at, 'date') else o.filled_at
+                if filled_date >= cutoff_date:
+                    result.append({
+                        "id": str(o.id),
+                        "symbol": o.symbol,  # Option symbol like AAPL260815P00280000
+                        "side": str(o.side),  # SELL for CSPs
+                        "qty": float(o.qty) if o.qty else None,
+                        "type": str(o.type),
+                        "status": str(o.status),
+                        "limit_price": float(o.limit_price) if o.limit_price else None,
+                        "filled_avg_price": float(o.filled_avg_price) if o.filled_avg_price else None,
+                        "filled_at": o.filled_at.isoformat() if o.filled_at else None,
+                        "created_at": o.created_at.isoformat() if o.created_at else None,
+                        "asset_class": str(o.asset_class),
+                    })
+
+        logger.info(f"Retrieved {len(result)} closed orders from last {days_back} days")
+        return result
+
+    except Exception as e:
+        logger.error(f"Error retrieving closed orders: {str(e)}")
+        return []
 
 
 def place_csp_order(

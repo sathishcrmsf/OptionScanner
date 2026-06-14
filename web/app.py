@@ -1,11 +1,18 @@
 """
 Flask web dashboard for cash-secured put scan results.
+
+Follows dev-patterns:
+- Configuration loaded from environment variables
+- Error handling with user-friendly messages
+- Database initialization and migrations
+- Blueprints for route organization
 """
 
 from __future__ import annotations
 
 import sys
 import threading
+import logging
 from datetime import datetime, timezone
 from typing import Any, Dict
 
@@ -19,11 +26,63 @@ if PROJECT_ROOT not in sys.path:
 from options_scanner import OptionsScanner
 from web.results_loader import list_scans, load_latest_scan, load_scan
 from web.alpaca_service import get_account, get_positions, get_orders, place_csp_order
+from web.config import get_config
+from web.database import DatabaseManager, init_db
+from web.routes.trades import trades_bp
+from web.routes.alerts import alerts_bp
+from web.services import event_monitor
+from scanner.strategy_registry import get_all_strategies
 
+# Configure logging (must precede any logger use below)
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
+
+# Import strategies module to trigger strategy registration
+try:
+    import scanner.strategies  # noqa: F401
+except ImportError as e:
+    logger.warning(f"Could not import strategies module: {e}")
+
+# Load configuration
+try:
+    config = get_config()
+    logger.info(f"Configuration loaded: {config}")
+except ValueError as e:
+    logger.error(f"Configuration error: {str(e)}")
+    raise
+
+# Create Flask app
 app = Flask(__name__)
-app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 0
-app.config["TEMPLATES_AUTO_RELOAD"] = True
-app.jinja_env.auto_reload = True
+
+# Apply configuration
+app.config["HOST"] = config.HOST
+app.config["PORT"] = config.PORT
+app.config["DEBUG"] = config.DEBUG
+app.config["SEND_FILE_MAX_AGE_DEFAULT"] = config.SEND_FILE_MAX_AGE_DEFAULT
+app.config["TEMPLATES_AUTO_RELOAD"] = config.TEMPLATES_AUTO_RELOAD
+app.config["JSON_SORT_KEYS"] = config.JSON_SORT_KEYS
+
+# Initialize database
+try:
+    init_db()
+    logger.info("Database initialized successfully")
+except Exception as e:
+    logger.error(f"Database initialization failed: {str(e)}")
+    # Continue anyway - scanner routes don't need database yet
+
+# Register blueprints
+app.register_blueprint(trades_bp)
+logger.info("Registered trade routes blueprint")
+app.register_blueprint(alerts_bp)
+logger.info("Registered alerts routes blueprint")
+
+# Start the market-event monitor in the background. No-ops quietly if no event
+# sources are configured yet (it can be started later via /api/monitor/status).
+try:
+    if event_monitor.start_monitor():
+        logger.info("Event monitor started")
+except Exception as exc:
+    logger.warning(f"Could not start event monitor: {exc}")
 
 _scan_lock = threading.Lock()
 _scan_state: Dict[str, Any] = {
@@ -68,8 +127,34 @@ def _run_scan_background(dte_min: int, dte_max: int) -> None:
 
 
 @app.route("/")
-def index():
+def home():
+    """Home page with strategy selection."""
+    return render_template("home.html")
+
+
+@app.route("/scanner")
+def scanner():
+    """Scanner page - accepts ?strategy=CSP parameter."""
     return render_template("index.html")
+
+
+@app.route("/alerts")
+def alerts_page():
+    """Market-event monitoring & alerts page."""
+    return render_template("alerts.html")
+
+
+@app.route("/api/strategies")
+def api_strategies():
+    """Return list of available strategies for home screen."""
+    try:
+        strategies = get_all_strategies()
+        return jsonify({
+            "strategies": [metadata.to_dict() for metadata in strategies.values()]
+        }), 200
+    except Exception as e:
+        logger.error(f"Error fetching strategies: {str(e)}")
+        return jsonify({"error": "Failed to fetch strategies"}), 500
 
 
 @app.route("/api/scans")
@@ -106,6 +191,10 @@ def api_presets():
 def api_scan_start():
     body = request.get_json(silent=True) or {}
 
+    # Get strategy (default to CSP for backward compatibility)
+    strategy = str(body.get("strategy", "CSP")).upper()
+    logger.info(f"Scan request for strategy: {strategy}")
+
     # Resolve preset name → dte_min/dte_max
     preset = str(body.get("preset", "")).upper()
     if preset in DTE_PRESETS:
@@ -126,10 +215,13 @@ def api_scan_start():
         _scan_state["latest_timestamp"] = None
         _scan_state["dte_min"] = dte_min
         _scan_state["dte_max"] = dte_max
+        _scan_state["strategy"] = strategy
 
+    # For now, still use OptionsScanner (CSP-only) for backward compatibility
+    # TODO: In Phase 2, use strategy registry to dispatch to appropriate strategy
     thread = threading.Thread(target=_run_scan_background, args=(dte_min, dte_max), daemon=True)
     thread.start()
-    return jsonify({"status": "started", "dte_min": dte_min, "dte_max": dte_max}), 202
+    return jsonify({"status": "started", "dte_min": dte_min, "dte_max": dte_max, "strategy": strategy}), 202
 
 
 @app.route("/api/scan/status")
@@ -242,7 +334,14 @@ def api_save_credentials():
         except Exception:
             pass
 
-    updatable = ["tradier_token", "tradier_sandbox", "alpaca_key", "alpaca_secret"]
+    updatable = [
+        "tradier_token", "tradier_sandbox", "alpaca_key", "alpaca_secret",
+        # Market-event monitoring + alerting
+        "finnhub_token", "political_feed_url",
+        "telegram_bot_token", "telegram_chat_id",
+        "poll_interval_seconds", "price_move_pct", "volume_multiple",
+        "news_max_age_minutes",
+    ]
     for k in updatable:
         if k in body and body[k] != "" and body[k] is not None:
             existing[k] = body[k]

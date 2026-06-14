@@ -4,11 +4,27 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>CSP Scanner</title>
+  <link rel="stylesheet" href="/static/css/shared.css">
   <link rel="stylesheet" href="/static/css/dashboard.css?v=23">
+  <link rel="stylesheet" href="/static/css/performance.css?v=1">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
   <script src="/static/js/dashboard.js?v=23" defer></script>
+  <script src="/static/js/performance.js?v=1" defer></script>
 </head>
 <body>
+
+  <!-- Shared site navigation -->
+  <nav class="site-nav">
+    <a class="site-nav__brand" href="/">
+      <span class="site-nav__logo">📈</span>
+      <span>Trading Platform</span>
+    </a>
+    <div class="site-nav__links">
+      <a class="site-nav__link" href="/">🏠 Home</a>
+      <a class="site-nav__link is-active" href="/scanner">🔍 Scanner</a>
+      <a class="site-nav__link" href="/alerts">🔔 Alerts</a>
+    </div>
+  </nav>
 
   <!-- ── ZONE 1: TOP BAR ──────────────────────────────────────────────────── -->
   <header class="topbar">
@@ -312,6 +328,9 @@
           <button type="button" class="tab" data-tab="balanced">Balanced</button>
           <button type="button" class="tab tab-alpaca hidden" data-tab="positions" id="tab-positions">📋 Positions</button>
           <button type="button" class="tab tab-alpaca hidden" data-tab="orders" id="tab-orders">📜 Orders</button>
+          <button type="button" class="tab" data-tab="journal" id="journal-tab">📊 Trade Journal</button>
+          <button type="button" class="tab" data-tab="performance" id="performance-tab">📈 Performance</button>
+          <button type="button" class="tab" data-tab="strategy" id="strategy-tab">🎯 Strategy</button>
         </nav>
 
         <!-- Table -->
@@ -335,6 +354,21 @@
               <tr><td colspan="9" class="empty-cell">Configure your scan above and click ▶ Run Scan to get started.</td></tr>
             </tbody>
           </table>
+        </div>
+
+        <!-- Trade Journal Tab -->
+        <div id="trade-journal-container" class="tab-content hidden" role="tabpanel" aria-label="Trade journal">
+          <p>Loading trade journal...</p>
+        </div>
+
+        <!-- Performance Dashboard Tab -->
+        <div id="performance-container" class="tab-content hidden" role="tabpanel" aria-label="Performance analytics">
+          <p>Loading performance data...</p>
+        </div>
+
+        <!-- Strategy Analysis Tab -->
+        <div id="strategy-container" class="tab-content hidden" role="tabpanel" aria-label="Strategy analysis">
+          <p>Loading strategy analysis...</p>
         </div>
 
       </div><!-- /results-main -->

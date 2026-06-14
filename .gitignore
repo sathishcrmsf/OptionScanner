@@ -29,6 +29,11 @@ cache/
 # Credentials — never commit these
 data/credentials.json
 
+# Local databases (trade journal / market events) — not for version control
+data/*.db
+data/*.sqlite
+data/*.sqlite3
+
 # IDE / local config
 .claude/settings.local.json
 .idea/

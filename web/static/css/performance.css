@@ -1,0 +1,433 @@
+/**
+ * Performance Dashboard & Trade Journal Styling
+ *
+ * Follows ui-ux-patterns:
+ * - Mobile-first responsive design
+ * - Semantic structure
+ * - Accessibility (color contrast, semantic elements)
+ * - Flexible layout (no fixed widths)
+ *
+ * Reference: .claude/referenced-skills/ui-ux-patterns/
+ */
+
+/* =========================================================================
+   Trade Journal Tab
+   ======================================================================= */
+
+.trade-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.stat-box {
+  background: #f5f5f5;
+  padding: 1.5rem;
+  border-radius: 8px;
+  text-align: center;
+  border-left: 4px solid #2196F3;
+}
+
+.stat-box label {
+  display: block;
+  font-size: 0.875rem;
+  color: #666;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.stat-value {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.trades-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.trades-table thead {
+  background: #f9f9f9;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.trades-table th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: #333;
+  font-size: 0.875rem;
+}
+
+.trades-table td {
+  padding: 1rem;
+  border-bottom: 1px solid #e0e0e0;
+  font-size: 0.9rem;
+}
+
+.trades-table tbody tr:hover {
+  background: #f9f9f9;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.trade-row {
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.trade-row:hover {
+  background: #f0f0f0;
+}
+
+.btn-small {
+  background: none;
+  border: 1px solid #ddd;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+}
+
+.btn-small:hover {
+  background: #f0f0f0;
+  border-color: #999;
+}
+
+/* =========================================================================
+   Performance Dashboard Tab
+   ======================================================================= */
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.metric-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.metric-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.metric-card h3 {
+  margin: 0 0 1rem 0;
+  font-size: 0.875rem;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.metric-value {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.metric-detail {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #999;
+}
+
+.charts-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.chart-container {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.chart-container h3 {
+  margin: 0 0 1.5rem 0;
+  font-size: 1rem;
+  color: #333;
+}
+
+.chart-container canvas {
+  max-height: 300px;
+  width: 100% !important;
+}
+
+/* =========================================================================
+   Strategy Analysis Tab
+   ======================================================================= */
+
+.strategy-breakdown {
+  margin-bottom: 2rem;
+}
+
+.breakdown-selector {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.breakdown-selector .btn-small {
+  background: white;
+  border: 1px solid #ddd;
+  padding: 0.625rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+}
+
+.breakdown-selector .btn-small:hover {
+  border-color: #2196F3;
+  color: #2196F3;
+}
+
+.breakdown-selector .btn-small.active {
+  background: #2196F3;
+  color: white;
+  border-color: #2196F3;
+}
+
+.strategy-table {
+  width: 100%;
+  border-collapse: collapse;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.strategy-table thead {
+  background: #f9f9f9;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.strategy-table th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: #333;
+  font-size: 0.875rem;
+}
+
+.strategy-table td {
+  padding: 1rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.strategy-table tbody tr:hover {
+  background: #f9f9f9;
+}
+
+/* =========================================================================
+   Empty States
+   ======================================================================= */
+
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #666;
+}
+
+.empty-state p {
+  margin-bottom: 1.5rem;
+  font-size: 1rem;
+}
+
+.empty-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn-primary {
+  background: #2196F3;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+  background: #1976D2;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
+}
+
+/* =========================================================================
+   Responsive Design (Mobile-First)
+   ======================================================================= */
+
+@media (max-width: 768px) {
+  .trade-stats {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 0.75rem;
+  }
+
+  .stat-box {
+    padding: 1rem;
+    border-radius: 6px;
+  }
+
+  .stat-value {
+    font-size: 1.25rem;
+  }
+
+  .trades-table th,
+  .trades-table td {
+    padding: 0.75rem 0.5rem;
+    font-size: 0.8rem;
+  }
+
+  .metrics-grid {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+  }
+
+  .metric-card {
+    padding: 1rem;
+  }
+
+  .metric-value {
+    font-size: 1.5rem;
+  }
+
+  .charts-section {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .chart-container {
+    padding: 1rem;
+  }
+
+  .breakdown-selector {
+    gap: 0.25rem;
+  }
+
+  .breakdown-selector .btn-small {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .stat-box label {
+    font-size: 0.75rem;
+  }
+
+  .stat-value {
+    font-size: 1rem;
+  }
+
+  .trades-table {
+    font-size: 0.75rem;
+  }
+
+  .trades-table th,
+  .trades-table td {
+    padding: 0.5rem 0.25rem;
+  }
+
+  .metric-card h3 {
+    font-size: 0.75rem;
+  }
+
+  .metric-value {
+    font-size: 1.25rem;
+  }
+
+  .metric-detail {
+    font-size: 0.7rem;
+  }
+
+  .strategy-table th,
+  .strategy-table td {
+    padding: 0.75rem 0.5rem;
+    font-size: 0.75rem;
+  }
+}
+
+/* =========================================================================
+   Accessibility
+   ======================================================================= */
+
+/* High contrast for readability */
+.trades-table th,
+.strategy-table th {
+  color: #1a1a1a;
+  background: #f5f5f5;
+}
+
+/* Focus states for keyboard navigation */
+button:focus,
+input:focus,
+select:focus {
+  outline: 2px solid #2196F3;
+  outline-offset: 2px;
+}
+
+/* Ensure color not the only indicator */
+.stat-value[style*="color"],
+.metric-value[style*="color"],
+.strategy-table td[style*="color"] {
+  position: relative;
+}
+
+.stat-value[style*="#4CAF50"]::after,
+.metric-value[style*="#4CAF50"]::after,
+.strategy-table td[style*="#4CAF50"]::after {
+  content: ' ✓';
+  font-weight: bold;
+}
+
+.stat-value[style*="#ff5722"]::after,
+.metric-value[style*="#ff5722"]::after,
+.strategy-table td[style*="#ff5722"]::after {
+  content: ' ✗';
+  font-weight: bold;
+}
+
+/* Ensure text contrast meets WCAG AA */
+a {
+  color: #2196F3;
+  text-decoration: underline;
+}
+
+a:visited {
+  color: #1976D2;
+}
+
+a:focus {
+  outline: 2px solid #2196F3;
+  outline-offset: 2px;
+  border-radius: 2px;
+}

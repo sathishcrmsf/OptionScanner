@@ -2,10 +2,16 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "dashboard",
-      "runtimeExecutable": "/tmp/noop_server.sh",
-      "runtimeArgs": [],
-      "port": 5001
+      "name": "trading",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "web.app"],
+      "port": 5000
+    },
+    {
+      "name": "aadhivel-energy",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--prefix", "/Users/sathishkumar/Documents/claude/Aadhivel Energy"],
+      "port": 3000
     }
   ]
 }

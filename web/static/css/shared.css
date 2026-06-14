@@ -1,0 +1,97 @@
+/**
+ * shared.css — site-wide top navigation bar.
+ *
+ * One consistent nav across Home, Scanner, and Alerts so the site reads as a
+ * single orderly app. Self-contained (own surface/colour vars with a `sn-`
+ * prefix) so it sits correctly on both the light pages (home, alerts) and the
+ * dark scanner without colliding with their existing tokens.
+ */
+
+:root {
+  --sn-bg: #111827;
+  --sn-fg: #e5e7eb;
+  --sn-fg-muted: #9ca3af;
+  --sn-accent: #3b82f6;
+  --sn-accent-soft: rgba(59, 130, 246, 0.18);
+  --sn-border: #1f2937;
+  --sn-height: 56px;
+}
+
+.site-nav {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  height: var(--sn-height);
+  padding: 0 1.25rem;
+  background: var(--sn-bg);
+  border-bottom: 2px solid var(--sn-accent);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.site-nav__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--sn-fg);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.site-nav__logo {
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.site-nav__links {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.site-nav__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.85rem;
+  border-radius: 8px;
+  color: var(--sn-fg-muted);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: background 0.15s ease, color 0.15s ease;
+  white-space: nowrap;
+}
+
+.site-nav__link:hover {
+  color: var(--sn-fg);
+  background: var(--sn-border);
+}
+
+.site-nav__link.is-active {
+  color: #fff;
+  background: var(--sn-accent-soft);
+  box-shadow: inset 0 0 0 1px var(--sn-accent);
+}
+
+/* Optional slot on the right for page-specific status/badges. */
+.site-nav__aside {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--sn-fg-muted);
+  font-size: 0.8rem;
+}
+
+@media (max-width: 560px) {
+  .site-nav { padding: 0 0.75rem; gap: 0.5rem; }
+  .site-nav__brand span:last-child { display: none; } /* keep just the logo */
+  .site-nav__link { padding: 0.4rem 0.6rem; font-size: 0.82rem; }
+}

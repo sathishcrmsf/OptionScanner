@@ -19,6 +19,7 @@
   let sortDir       = "desc";
   let activePreset  = "STANDARD";
   let scanPollTimer = null;
+  let selectedStrategy = "CSP";  // Default to CSP
 
   // ── DOM refs ──────────────────────────────────────────────────────────────
   const $ = id => document.getElementById(id);
@@ -90,7 +91,12 @@
     fetch("/api/scan", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ preset: activePreset, dte_min: min, dte_max: max }),
+      body: JSON.stringify({
+        strategy: selectedStrategy,
+        preset: activePreset,
+        dte_min: min,
+        dte_max: max
+      }),
     })
       .then(r => r.json())
       .then(d => {
@@ -721,6 +727,47 @@
     });
   }
 
+  // ── Load strategy metadata and update UI ──────────────────────────────────
+  function loadStrategyMetadata() {
+    fetch('/api/strategies')
+      .then(r => r.json())
+      .then(data => {
+        const strategies = data.strategies || [];
+        const strategy = strategies.find(s => s.id === selectedStrategy);
+
+        if (!strategy) {
+          console.warn(`Strategy ${selectedStrategy} not found, defaulting to CSP`);
+          selectedStrategy = 'CSP';
+          return;
+        }
+
+        // Update page title
+        document.title = `${strategy.name} Scanner`;
+
+        // Update topbar title if present
+        const topbarTitle = document.querySelector('.topbar-title');
+        if (topbarTitle) {
+          topbarTitle.textContent = `${strategy.name} Scanner`;
+        }
+
+        // Update setup label if present
+        const setupLabel = document.querySelector('.setup-label');
+        if (setupLabel) {
+          setupLabel.textContent = `CONFIGURE YOUR ${strategy.name.toUpperCase()}`;
+        }
+
+        // Apply strategy-specific theme color
+        if (strategy.color_hex) {
+          document.documentElement.style.setProperty('--strategy-primary-color', strategy.color_hex);
+        }
+
+        console.log(`Loaded strategy: ${strategy.name}`);
+      })
+      .catch(err => {
+        console.error('Error loading strategy metadata:', err);
+      });
+  }
+
   // ── Helpers ───────────────────────────────────────────────────────────────
   function fmt2(v) { return (parseFloat(v) || 0).toFixed(2); }
   function fmt1(v) { return (parseFloat(v) || 0).toFixed(1); }
@@ -1053,6 +1100,13 @@
 
   // ── Init ──────────────────────────────────────────────────────────────────
   function init() {
+    // Read strategy from URL query parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    selectedStrategy = urlParams.get('strategy') || 'CSP';
+
+    // Load strategy metadata and update UI
+    loadStrategyMetadata();
+
     loadAccountSize();
     setPreset("STANDARD");
     loadProviderStatus();
@@ -1127,6 +1181,10 @@
         const prevTab = currentTab;
         currentTab = tab.dataset.tab;
 
+        // Hide all tab content first
+        document.querySelectorAll(".tab-content").forEach(c => c.classList.add("hidden"));
+        $("results-table").parentElement.classList.remove("hidden");
+
         // Alpaca-specific tabs: custom render, don't run scanner applyFilters
         if (currentTab === "positions") {
           if (!isAlpacaConnected()) { showError("Connect Alpaca first (⚙️ button)."); return; }
@@ -1145,8 +1203,37 @@
           return;
         }
 
-        // Switching back from Alpaca tabs — restore scanner header first
-        if (prevTab === "positions" || prevTab === "orders") {
+        // Performance tabs: show tab content and load data
+        if (currentTab === "journal") {
+          $("results-table").parentElement.classList.add("hidden");
+          $("banded-picks").classList.add("hidden");
+          $("trade-journal-container").classList.remove("hidden");
+          if (typeof loadTradeJournal === "function") {
+            loadTradeJournal();
+          }
+          return;
+        }
+        if (currentTab === "performance") {
+          $("results-table").parentElement.classList.add("hidden");
+          $("banded-picks").classList.add("hidden");
+          $("performance-container").classList.remove("hidden");
+          if (typeof loadPerformance === "function") {
+            loadPerformance();
+          }
+          return;
+        }
+        if (currentTab === "strategy") {
+          $("results-table").parentElement.classList.add("hidden");
+          $("banded-picks").classList.add("hidden");
+          $("strategy-container").classList.remove("hidden");
+          if (typeof loadStrategyAnalysis === "function") {
+            loadStrategyAnalysis("delta_band");
+          }
+          return;
+        }
+
+        // Switching back from Alpaca/Performance tabs — restore scanner header first
+        if (prevTab === "positions" || prevTab === "orders" || prevTab === "journal" || prevTab === "performance" || prevTab === "strategy") {
           restoreScannerTableHeader();
         }
 

@@ -35,7 +35,7 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
   display: flex; align-items: center; justify-content: space-between;
   padding: 0 1.5rem; height: 56px;
   background: var(--surface); border-bottom: 2px solid var(--blue);
-  position: sticky; top: 0; z-index: 100;
+  position: sticky; top: 56px; z-index: 100; /* sits below the shared site-nav (56px) */
 }
 .topbar-brand { display: flex; align-items: center; gap: .75rem; }
 .topbar-logo  { font-size: 1.6rem; color: var(--blue); line-height: 1; }

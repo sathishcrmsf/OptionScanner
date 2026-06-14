@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Strategy Trading Platform</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/shared.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
+</head>
+<body>
+    <!-- Shared site navigation -->
+    <nav class="site-nav">
+        <a class="site-nav__brand" href="/">
+            <span class="site-nav__logo">📈</span>
+            <span>Trading Platform</span>
+        </a>
+        <div class="site-nav__links">
+            <a class="site-nav__link is-active" href="/">🏠 Home</a>
+            <a class="site-nav__link" href="/scanner">🔍 Scanner</a>
+            <a class="site-nav__link" href="/alerts">🔔 Alerts</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="hero">
+        <div class="hero-content">
+            <h1>📈 Trading Strategy Platform</h1>
+            <p class="subtitle">Choose your strategy and start scanning for opportunities</p>
+        </div>
+    </header>
+
+    <!-- Strategy Selection Grid -->
+    <main class="container">
+        <section class="strategies-section">
+            <h2>Available Strategies</h2>
+            <div class="strategies-grid" id="strategies-grid">
+                <!-- Dynamically populated by JavaScript -->
+                <div class="loading-spinner">
+                    <p>Loading strategies...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Stats Section (Optional) -->
+        <section class="stats-section">
+            <h2>How It Works</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>🔍 Scan</h3>
+                    <p>Choose a strategy and configure your scan parameters (DTE, delta, yield)</p>
+                </div>
+                <div class="stat-card">
+                    <h3>📊 Analyze</h3>
+                    <p>Review opportunities ranked by income efficiency, safety, or highest yield</p>
+                </div>
+                <div class="stat-card">
+                    <h3>📝 Track</h3>
+                    <p>Log your trades and analyze performance with professional trader metrics</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Strategy Detail Modal -->
+    <div id="strategy-modal" class="modal hidden">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeStrategyModal()">&times;</button>
+            <div id="modal-body">
+                <!-- Populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/home.js') }}"></script>
+</body>
+</html>

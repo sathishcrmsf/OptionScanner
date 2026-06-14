@@ -375,6 +375,99 @@ def get_puts_chain(symbol: str, expirations: List[str]) -> Optional[pd.DataFrame
     return None
 
 
+def get_calls_chain(symbol: str, expirations: List[str] = None) -> Optional[pd.DataFrame]:
+    """
+    Return CALL option chain for all listed expirations as one DataFrame.
+    Tries: Alpaca option snapshots → yfinance.
+
+    Output columns (normalised):
+      strike, bid, ask, delta, theta, impliedVolatility, openInterest,
+      volume, expiration, option_type
+
+    Used by Wheel strategy to find calls for covered call leg after assignment.
+    """
+    # Get available expirations if not provided
+    if expirations is None:
+        expirations = get_option_expirations(symbol)
+
+    if not expirations:
+        logger.warning("No expirations for %s", symbol)
+        return None
+
+    # 1. Alpaca option chain
+    client = _get_options_client()
+    if client and expirations:
+        try:
+            from alpaca.data import OptionChainRequest
+            exp_dates = sorted(expirations)
+            req = OptionChainRequest(
+                underlying_symbol=symbol,
+                expiration_date_gte=exp_dates[0],
+                expiration_date_lte=exp_dates[-1],
+                type="call",
+            )
+            chain = client.get_option_chain(req)
+            if chain:
+                rows = []
+                for occ_sym, snap in chain.items():
+                    # Filter to only requested expirations
+                    exp_str = _exp_from_occ(occ_sym, symbol)
+                    if exp_str not in expirations:
+                        continue
+                    q = snap.latest_quote
+                    g = snap.greeks
+                    if q is None:
+                        continue
+                    bid = float(q.bid_price or 0)
+                    ask = float(q.ask_price or 0)
+                    if bid <= 0 and ask <= 0:
+                        continue
+                    rows.append({
+                        "contractSymbol":    occ_sym,
+                        "strike":            _strike_from_occ(occ_sym, symbol),
+                        "bid":               bid,
+                        "ask":               ask,
+                        "lastPrice":         float(getattr(snap.latest_trade, "price", 0) or 0),
+                        "delta":             float(g.delta) if g and g.delta is not None else None,
+                        "theta":             float(g.theta) if g and g.theta is not None else None,
+                        "gamma":             float(g.gamma) if g and g.gamma is not None else None,
+                        "vega":              float(g.vega)  if g and g.vega  is not None else None,
+                        "rho":               float(g.rho)   if g and g.rho   is not None else None,
+                        "impliedVolatility": float(g.vega / 39.447) if g and g.vega else None,  # IV approximation
+                        "openInterest":      int(snap.open_interest or 0),
+                        "volume":            0,  # Not provided by Alpaca
+                        "expiration":        exp_str,
+                        "option_type":       "call",
+                    })
+                if rows:
+                    logger.debug("calls for %s via Alpaca", symbol)
+                    return pd.DataFrame(rows)
+        except Exception as exc:
+            logger.warning("Alpaca options error for %s: %s", symbol, exc)
+
+    # 2. yfinance fallback (same structure as puts)
+    try:
+        frames = []
+        for exp_str in expirations:
+            try:
+                yf_data = yf_ticker(symbol)
+                options_df = yf_data.option_chain(exp_str).calls
+                if options_df is None or options_df.empty:
+                    continue
+                options_df["expiration"] = exp_str
+                options_df["option_type"] = "call"
+                frames.append(options_df)
+            except Exception as exc:
+                logger.debug("yfinance call chain error for %s exp %s: %s", symbol, exp_str, exc)
+        if frames:
+            logger.debug("calls for %s via yfinance fallback", symbol)
+            return pd.concat(frames, ignore_index=True)
+    except Exception as exc:
+        logger.warning("yfinance call fallback for %s: %s", symbol, exc)
+
+    return None
+
+
 # ── OCC symbol helpers ────────────────────────────────────────────────────────
 
 def _exp_from_occ(occ_sym: str, underlying: str) -> str:
